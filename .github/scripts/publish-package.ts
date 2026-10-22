@@ -40,7 +40,7 @@ async function main(): Promise<void> {
   }
 
   const result = Bun.spawnSync({
-    cmd: ['npm', 'publish', tarball, '--provenance', '--access', 'public', '--tag', npmDistTag(releaseVersion)],
+    cmd: ['npm', 'publish', tarball, '--access', 'public', '--tag', npmDistTag(releaseVersion)],
     stdout: 'inherit',
     stderr: 'inherit'
   })
