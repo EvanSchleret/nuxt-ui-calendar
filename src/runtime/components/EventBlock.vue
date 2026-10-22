@@ -107,7 +107,7 @@ function resizeWithKeyboard(event: KeyboardEvent) {
       :aria-label="event.allDay ? `${event.title}, all day` : `${event.title}, ${timeLabel}`"
       :draggable="true"
       :class="[
-        'flex h-full min-w-0 w-full cursor-pointer flex-col overflow-hidden px-1.5 py-1 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary',
+        'flex size-full min-w-0 cursor-pointer flex-col overflow-hidden px-1.5 py-1 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary',
         colorClasses[calendarColor],
         compact ? 'min-h-5 border-0 px-1 py-0 text-[11px] leading-5' : ''
       ]"
@@ -122,7 +122,7 @@ function resizeWithKeyboard(event: KeyboardEvent) {
     <button
       v-if="positioned && !event.allDay"
       type="button"
-      class="absolute inset-x-0 bottom-0 z-10 h-2 cursor-ns-resize bg-transparent opacity-0 focus:opacity-100 group-hover:opacity-100"
+      class="absolute inset-x-0 bottom-0 z-10 h-2 cursor-ns-resize bg-transparent opacity-0 group-hover:opacity-100 focus:opacity-100"
       :aria-label="`Resize ${event.title}`"
       @pointerdown="startResize"
       @keydown="resizeWithKeyboard"

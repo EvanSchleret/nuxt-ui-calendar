@@ -14,7 +14,7 @@ const title = computed(() => formatCalendarTitle(calendar.date.value, calendar.v
 </script>
 
 <template>
-  <div class="ui-calendar relative flex h-full min-h-[38rem] overflow-hidden bg-default text-default">
+  <div class="ui-calendar relative flex h-full min-h-152 overflow-hidden bg-default text-default">
     <CalendarSidebar class="hidden w-72 shrink-0 border-r border-default lg:flex" />
 
     <div class="flex min-w-0 flex-1 flex-col">

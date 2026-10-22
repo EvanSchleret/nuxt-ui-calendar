@@ -46,7 +46,7 @@ function dropEvent(day: Date, dragEvent: DragEvent) {
         v-for="day in days"
         :key="localDateTime(day).slice(0, 10)"
         :data-date="localDateTime(day).slice(0, 10)"
-        class="group min-h-20 overflow-hidden border-b border-r border-default p-1 sm:p-2"
+        class="group min-h-20 overflow-hidden border-r border-b border-default p-1 sm:p-2"
         :class="isDateInMonth(day, calendar.date.value) ? 'bg-default' : 'bg-elevated/30'"
         @dblclick="createAllDay(day)"
         @dragover.prevent

@@ -107,7 +107,7 @@ const heading = computed(() => formatCalendarTitle(calendar.date.value, calendar
             class="flex min-h-14 flex-col items-center justify-center border-r border-default text-sm hover:bg-elevated"
             @click="calendar.setDate(day)"
           >
-            <span class="text-xs uppercase text-muted">{{ dayLabel(day) }}</span>
+            <span class="text-xs text-muted uppercase">{{ dayLabel(day) }}</span>
             <span :class="isToday(day) ? 'flex size-7 items-center justify-center rounded-full bg-primary font-semibold text-inverted' : 'font-medium text-highlighted'">{{ day.getDate() }}</span>
           </button>
         </div>
@@ -158,7 +158,7 @@ const heading = computed(() => formatCalendarTitle(calendar.date.value, calendar
               :positioned="eventPosition(positioned.event, day)"
             />
             <div v-if="isToday(day)" class="pointer-events-none absolute inset-x-0 z-20 border-t-2 border-error" :style="{ top: `${(now.getHours() * 60 + now.getMinutes()) * HOUR_HEIGHT / 60}px` }">
-              <span class="absolute -left-1.5 -top-1 size-3 rounded-full bg-error" />
+              <span class="absolute -top-1 -left-1.5 size-3 rounded-full bg-error" />
             </div>
           </div>
         </div>
