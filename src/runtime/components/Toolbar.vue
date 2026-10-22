@@ -7,7 +7,6 @@ import type { CalendarTitle } from '../utils/dates'
 const props = withDefaults(defineProps<{ title: CalendarTitle, viewSwitcherPlacement?: 'center' | 'right' }>(), {
   viewSwitcherPlacement: 'center'
 })
-const emit = defineEmits<{ menu: [] }>()
 defineSlots<Pick<CalendarAppSlots, 'view-switcher' | 'previous' | 'today' | 'next'>>()
 const calendar = useCalendar()
 const viewOptions = [
@@ -33,25 +32,12 @@ function changeView(value: string | number) {
 </script>
 
 <template>
-  <header class="glass-material absolute inset-x-0 top-0 z-10 flex h-[calc(var(--ui-header-height)+0.5rem)] items-center gap-2 border-b border-default px-4 pt-2 sm:gap-4">
-    <div class="pointer-events-none absolute inset-0 -z-10 bg-(--glass-bg) bg-linear-to-b from-default from-40% to-transparent" />
-
-    <UButton
-      icon="i-lucide-menu"
-      color="neutral"
-      variant="soft"
-      size="sm"
-      aria-label="Open calendar menu"
-      class="shrink-0 lg:hidden"
-      :class="props.viewSwitcherPlacement === 'right' ? 'order-1' : undefined"
-      @click="emit('menu')"
-    />
-
+  <header class="absolute inset-x-0 top-0 z-10 flex h-[calc(var(--ui-header-height)+0.5rem)] items-center gap-2 border-b border-default bg-default px-4 pt-2 sm:gap-4">
     <h1
       class="flex min-w-0 flex-1 items-baseline gap-1.5 truncate text-xl tracking-tight transition-opacity duration-0 sm:text-2xl"
       :class="[
         calendar.view.value === 'month' && calendar.monthLabelsVisible.value ? 'opacity-0 delay-150' : 'opacity-100',
-        props.viewSwitcherPlacement === 'right' ? 'order-2' : undefined
+        props.viewSwitcherPlacement === 'right' ? 'order-1' : undefined
       ]"
     >
       <span class="truncate font-bold text-highlighted">{{ title.months }}</span>
@@ -60,7 +46,7 @@ function changeView(value: string | number) {
 
     <div
       class="shrink-0"
-      :class="props.viewSwitcherPlacement === 'right' ? 'order-4' : 'mx-auto'"
+      :class="props.viewSwitcherPlacement === 'right' ? 'order-3' : 'mx-auto'"
     >
       <slot name="view-switcher" v-bind="slotProps">
         <UTabs
@@ -83,7 +69,7 @@ function changeView(value: string | number) {
 
     <div
       class="flex items-center justify-end gap-1 sm:gap-2 md:flex-1"
-      :class="props.viewSwitcherPlacement === 'right' ? 'order-3' : undefined"
+      :class="props.viewSwitcherPlacement === 'right' ? 'order-2' : undefined"
     >
       <UBadge
         v-if="calendar.online.value && calendar.pendingCount.value"

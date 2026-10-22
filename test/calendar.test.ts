@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'bun:test'
 import { daysForView, localDateTime } from '../src/runtime/utils/dates'
+import { hiddenCalendarIdsFor } from '../src/runtime/utils/calendars'
 import { layoutDay } from '../src/runtime/utils/layout'
-import type { CalendarEvent } from '../src/runtime/types'
+import type { CalendarDefinition, CalendarEvent } from '../src/runtime/types'
 
 describe('calendar date utilities', () => {
   it('formats local datetimes without a timezone suffix', () => {
@@ -29,5 +30,20 @@ describe('day event layout', () => {
 
     expect(positioned).toHaveLength(2)
     expect(positioned[0]?.left).not.toBe(positioned[1]?.left)
+  })
+})
+
+describe('calendar visibility', () => {
+  const calendars: CalendarDefinition[] = [
+    { id: 'work', name: 'Work', color: 'info' },
+    { id: 'personal', name: 'Personal', color: 'primary' }
+  ]
+
+  it('converts selected calendar ids to the hidden ids used by the controller', () => {
+    expect(hiddenCalendarIdsFor(calendars, ['work'])).toEqual(['personal'])
+  })
+
+  it('supports hiding every calendar', () => {
+    expect(hiddenCalendarIdsFor(calendars, [])).toEqual(['work', 'personal'])
   })
 })

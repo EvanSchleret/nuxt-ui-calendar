@@ -14,11 +14,21 @@ export interface CalendarToolbarSlotProps {
 }
 
 export interface CalendarAppSlots {
-  'sidebar-footer'?: () => VNode[]
   'view-switcher'?: (props: CalendarToolbarSlotProps) => VNode[]
   previous?: (props: CalendarToolbarSlotProps) => VNode[]
   today?: (props: CalendarToolbarSlotProps) => VNode[]
   next?: (props: CalendarToolbarSlotProps) => VNode[]
+}
+
+export interface CalendarSidebarSlots {
+  header?: (props: { calendar: CalendarController, close: () => void }) => VNode[]
+  content?: (props: { calendar: CalendarController }) => VNode[]
+  search?: (props: { calendar: CalendarController, openSearch: () => Promise<void>, shortcuts: boolean }) => VNode[]
+  'calendars-header'?: (props: { calendars: CalendarDefinition[], visibleCount: number, totalCount: number }) => VNode[]
+  'calendar-list'?: (props: { calendars: CalendarDefinition[], visibleCalendarIds: string[], isVisible: (id: string) => boolean, toggleCalendar: (id: string) => void }) => VNode[]
+  calendar?: (props: { item: CalendarDefinition, selected: boolean, toggle: () => void }) => VNode[]
+  'mini-calendar'?: (props: { date: Date, locale: string, setDate: (date: Date) => void }) => VNode[]
+  footer?: (props: { calendar: CalendarController }) => VNode[]
 }
 
 export interface CalendarDefinition {
@@ -71,6 +81,7 @@ export interface CalendarMutationAdapter {
 export interface CalendarAppProps {
   events?: CalendarEvent[]
   calendars?: CalendarDefinition[]
+  visibleCalendarIds?: string[]
   adapter?: CalendarMutationAdapter
   eventModal?: CalendarEventModalComponent
   date?: Date | string
@@ -86,6 +97,7 @@ export interface CalendarAppProps {
 
 export type CalendarAppEmits = {
   (event: 'update:events', events: CalendarEvent[]): void
+  (event: 'update:visibleCalendarIds', ids: string[]): void
   (event: 'update:date', date: Date): void
   (event: 'update:view', view: CalendarView): void
   (event: 'create' | 'update', eventData: CalendarEvent): void
@@ -97,6 +109,7 @@ export interface CalendarController {
   view: Ref<CalendarView>
   events: Ref<CalendarEvent[]>
   calendars: Ref<CalendarDefinition[]>
+  visibleCalendarIds: Ref<string[]>
   visibleEvents: Ref<CalendarEvent[]>
   hiddenCalendarIds: Ref<string[]>
   online: Ref<boolean>
@@ -111,12 +124,17 @@ export interface CalendarController {
   move: (direction: -1 | 1) => void
   goToToday: () => void
   toggleCalendar: (id: string) => void
+  setVisibleCalendarIds: (ids: string[]) => void
   eventsForDay: (date: Date) => CalendarEvent[]
   createEvent: (event: CalendarEvent) => Promise<void>
   updateEvent: (event: CalendarEvent) => Promise<void>
   removeEvent: (id: string) => Promise<void>
   openEvent: (event?: CalendarEvent, start?: Date, allDay?: boolean) => Promise<void>
   openSearch: () => Promise<void>
+}
+
+export interface CalendarAppExpose {
+  calendar: CalendarController | undefined
 }
 
 export interface PositionedCalendarEvent {

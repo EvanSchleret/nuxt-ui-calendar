@@ -1,6 +1,6 @@
 # Nuxt UI Calendar
 
-A Nuxt module that provides the Calendar template's core UI and interactions as reusable components and composables. It includes day, week and month views, a responsive sidebar with a mini calendar, event editing and search overlays, drag and resize gestures, keyboard shortcuts, calendar visibility filters, optimistic updates, and an offline mutation queue.
+A Nuxt module that provides the Calendar template's core UI and interactions as reusable components and composables. It includes day, week and month views, an optional standalone sidebar with a mini calendar, event editing and search overlays, drag and resize gestures, keyboard shortcuts, calendar visibility filters, optimistic updates, and an offline mutation queue.
 
 The module provides client-side UI. The host application owns event loading and persistence through props and an optional adapter. `calendars` is optional; omit it to use the calendar without calendar filters or calendar assignments.
 
@@ -29,8 +29,7 @@ export default defineNuxtConfig({
 })
 ```
 
-`CalendarApp` provides a `UApp` boundary for its overlays and toast feedback.
-It also provides the template's Nuxt UI theme defaults and exposes a `sidebar-footer` slot for host-specific account controls.
+`CalendarApp` provides a `UApp` boundary for its overlays and toast feedback. It renders only the calendar and toolbar, and exposes its controller through a component ref. `CalendarSidebar` is a separate component that accepts this controller, so the host application can place it in its own layout.
 
 Buttons, checkboxes, badges and tabs use Nuxt UI's default component shapes. Customize their defaults centrally with Nuxt UI's `app.config.ts`:
 
@@ -132,6 +131,60 @@ For standalone events that do not belong to a named calendar, omit `calendarId` 
 <CalendarApp v-model:events="events" />
 ```
 
+`CalendarSidebar` is optional. When you provide calendars without the sidebar, control their visibility with `v-model:visible-calendar-ids`:
+
+```vue
+<script setup lang="ts">
+const visibleCalendarIds = ref(['personal', 'work'])
+
+function toggleCalendar(id: string) {
+  visibleCalendarIds.value = visibleCalendarIds.value.includes(id)
+    ? visibleCalendarIds.value.filter(visibleId => visibleId !== id)
+    : [...visibleCalendarIds.value, id]
+}
+</script>
+
+<template>
+  <div v-for="item in calendars" :key="item.id">
+    <UCheckbox
+      :label="item.name"
+      :model-value="visibleCalendarIds.includes(item.id)"
+      @update:model-value="toggleCalendar(item.id)"
+    />
+  </div>
+
+  <CalendarApp
+    v-model:events="events"
+    v-model:visible-calendar-ids="visibleCalendarIds"
+    :calendars="calendars"
+  />
+</template>
+```
+
+The model contains the IDs of displayed calendars. Start it with all calendar IDs to display everything, or with an empty array to hide them all. The sidebar uses this same model internally.
+
+Compose the optional sidebar next to the calendar with a template ref:
+
+```vue
+<script setup lang="ts">
+import { ref, useTemplateRef } from 'vue'
+import type { CalendarAppExpose } from '@evanschleret/nuxt-ui-calendar/runtime/types'
+
+const calendarApp = useTemplateRef<CalendarAppExpose>('calendarApp')
+const sidebarOpen = ref(true)
+</script>
+
+<template>
+  <div class="flex h-screen min-h-0">
+    <CalendarSidebar v-if="calendarApp?.calendar" v-model:open="sidebarOpen" :calendar="calendarApp.calendar" />
+    <CalendarApp ref="calendarApp" v-model:events="events" :calendars="calendars" class="min-w-0 flex-1" />
+  </div>
+</template>
+```
+
+Control the sidebar's visibility with `v-model:open`, and customize its bottom area with the `footer` slot.
+The `header`, `content`, `search`, `calendars-header`, `calendar-list`, `calendar`, `mini-calendar` and `footer` slots let you replace the corresponding areas. The calendar item slot receives `item`, `selected` and a `toggle` action; the calendar list slot receives `calendars`, `visibleCalendarIds`, `isVisible` and `toggleCalendar`.
+
 ## Custom event modal
 
 Pass your own Vue component through `eventModal` to replace the built-in create and edit modal. The component receives `event`, `calendars`, `initialStart`, `allDay` and `locale`, and must emit the typed `close` result. This same component opens from double-clicks and the create buttons. Keyboard shortcuts are opt-in with the `shortcuts` prop.
@@ -169,8 +222,8 @@ Events use floating local datetime strings in `YYYY-MM-DDTHH:mm:ss` form. Their 
 
 The module auto-registers these components with the configured prefix:
 
-- `CalendarApp` composes the full responsive calendar interface.
-- `CalendarSidebar` provides the mini calendar and calendar visibility toggles.
+- `CalendarApp` renders the calendar and toolbar, and exposes its `CalendarController` as `calendar` on its component ref.
+- `CalendarSidebar` takes that controller as a `calendar` prop and provides the mini calendar and calendar visibility toggles.
 - `CalendarToolbar` provides view switching, range navigation, search and event creation.
 - `CalendarWeekView` and `CalendarMonthView` render the calendar grids.
 - `CalendarEventBlock` is the reusable event button used by both views.
@@ -178,6 +231,10 @@ The module auto-registers these components with the configured prefix:
 `useCalendar()` returns the current date, view, visible events, calendars, navigation actions, event mutations and overlay actions inside `CalendarApp`. `useCalendarEvents()` provides visible events and an `eventsForDay` selector.
 
 `shortcuts` enables `T` for today, `D`, `W` and `M` for views, `N` for a new event, `⌘K` / `Ctrl+K` for search and the arrow keys for previous and next ranges. It defaults to `false`, and the calendar does not display shortcut help. `infiniteScroll` controls month-view scrolling and defaults to `true`; set it to `false` to show the current six-week month grid without extending it while scrolling.
+
+```vue
+<CalendarApp :infinite-scroll="false" />
+```
 
 ## Development
 

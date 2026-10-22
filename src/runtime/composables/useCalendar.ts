@@ -5,6 +5,7 @@ import { eventCoversDay, stepDate } from '../utils/dates'
 import EventModal from '../components/EventModal.vue'
 import SearchModal from '../components/SearchModal.vue'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
+import { hiddenCalendarIdsFor } from '../utils/calendars'
 
 interface QueuedMutation {
   mutation: CalendarMutation
@@ -76,6 +77,7 @@ export function createCalendarController(props: CalendarAppProps, emit: Calendar
   const calendars = computed<CalendarDefinition[]>(() => props.calendars ?? [])
   const storageKey = props.storageKey ?? 'nuxt-ui-calendar'
   const hiddenCalendarIds = useCookie<string[]>(`${storageKey}:hidden`, { default: () => [] })
+  const visibleCalendarIds = computed(() => calendars.value.filter(calendar => !hiddenCalendarIds.value.includes(calendar.id)).map(calendar => calendar.id))
   const online = ref(true)
   const error = ref<string | null>(null)
   const monthLabelsVisible = ref(false)
@@ -85,6 +87,12 @@ export function createCalendarController(props: CalendarAppProps, emit: Calendar
   const visibleEvents = computed(() => events.value.filter(event => !event.calendarId || !hiddenCalendarIds.value.includes(event.calendarId)))
   let overlayOpen = false
   let replaying = false
+
+  watch([() => props.visibleCalendarIds, calendars], ([visibleIds]) => {
+    if (visibleIds !== undefined) {
+      hiddenCalendarIds.value = hiddenCalendarIdsFor(calendars.value, visibleIds)
+    }
+  }, { immediate: true })
 
   function updateEvents(next: CalendarEvent[]) {
     events.value = next
@@ -131,10 +139,21 @@ export function createCalendarController(props: CalendarAppProps, emit: Calendar
     setDate(new Date())
   }
 
+  function setVisibleCalendarIds(ids: string[]) {
+    const requestedIds = new Set(ids)
+    const nextVisibleIds = calendars.value.filter(calendar => requestedIds.has(calendar.id)).map(calendar => calendar.id)
+    hiddenCalendarIds.value = hiddenCalendarIdsFor(calendars.value, nextVisibleIds)
+    emit('update:visibleCalendarIds', nextVisibleIds)
+  }
+
   function toggleCalendar(id: string) {
-    hiddenCalendarIds.value = hiddenCalendarIds.value.includes(id)
-      ? hiddenCalendarIds.value.filter(calendarId => calendarId !== id)
-      : [...hiddenCalendarIds.value, id]
+    const nextVisibleIds = new Set(visibleCalendarIds.value)
+    if (nextVisibleIds.has(id)) {
+      nextVisibleIds.delete(id)
+    } else {
+      nextVisibleIds.add(id)
+    }
+    setVisibleCalendarIds([...nextVisibleIds])
   }
 
   function eventsForDay(day: Date): CalendarEvent[] {
@@ -339,6 +358,7 @@ export function createCalendarController(props: CalendarAppProps, emit: Calendar
     view,
     events,
     calendars,
+    visibleCalendarIds,
     visibleEvents,
     hiddenCalendarIds,
     online,
@@ -353,6 +373,7 @@ export function createCalendarController(props: CalendarAppProps, emit: Calendar
     move,
     goToToday,
     toggleCalendar,
+    setVisibleCalendarIds,
     eventsForDay,
     createEvent,
     updateEvent,

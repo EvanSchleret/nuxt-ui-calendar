@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import type { CalendarAppEmits, CalendarAppProps, CalendarAppSlots } from '../types'
+import { computed, useTemplateRef } from 'vue'
+import CalendarWorkspace from './Workspace.vue'
+import type { CalendarAppEmits, CalendarAppProps, CalendarAppSlots, CalendarController } from '../types'
+
+const workspace = useTemplateRef<{ calendar: CalendarController }>('workspace')
+const calendar = computed(() => workspace.value?.calendar)
+defineExpose({ calendar })
 
 const props = withDefaults(defineProps<CalendarAppProps>(), {
   events: () => [],
@@ -19,17 +25,16 @@ defineSlots<CalendarAppSlots>()
 <template>
   <UApp>
     <CalendarWorkspace
+      ref="workspace"
       v-bind="props"
       @update:events="emit('update:events', $event)"
+      @update:visible-calendar-ids="emit('update:visibleCalendarIds', $event)"
       @update:date="emit('update:date', $event)"
       @update:view="emit('update:view', $event)"
       @create="emit('create', $event)"
       @update="emit('update', $event)"
       @delete="emit('delete', $event)"
     >
-      <template v-if="$slots['sidebar-footer']" #sidebar-footer>
-        <slot name="sidebar-footer" />
-      </template>
       <template v-if="$slots['view-switcher']" #view-switcher="slotProps">
         <slot name="view-switcher" v-bind="slotProps" />
       </template>

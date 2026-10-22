@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { createCalendarController, provideCalendar } from '#imports'
+import CalendarMonthView from './MonthView.vue'
+import CalendarToolbar from './Toolbar.vue'
+import CalendarWeekView from './WeekView.vue'
 import type { CalendarAppEmits, CalendarAppProps, CalendarAppSlots } from '../types'
 import { formatCalendarTitle } from '../utils/dates'
 
@@ -9,25 +12,18 @@ const emit = defineEmits<CalendarAppEmits>()
 const calendar = createCalendarController(props, emit)
 provideCalendar(calendar)
 
-const sidebarOpen = ref(true)
 const title = computed(() => formatCalendarTitle(calendar.date.value, calendar.view.value, calendar.locale))
 
 defineSlots<CalendarAppSlots>()
+defineExpose({ calendar })
 </script>
 
 <template>
   <div class="ui-calendar relative flex h-full min-h-152 overflow-hidden bg-default text-default">
-    <CalendarSidebar v-model:open="sidebarOpen">
-      <template v-if="$slots['sidebar-footer']" #footer>
-        <slot name="sidebar-footer" />
-      </template>
-    </CalendarSidebar>
-
     <div class="relative flex min-w-0 flex-1 flex-col overflow-hidden">
       <CalendarToolbar
         :title="title"
         :view-switcher-placement="props.viewSwitcherPlacement ?? 'center'"
-        @menu="sidebarOpen = !sidebarOpen"
       >
         <template v-if="$slots['view-switcher']" #view-switcher="slotProps">
           <slot name="view-switcher" v-bind="slotProps" />
