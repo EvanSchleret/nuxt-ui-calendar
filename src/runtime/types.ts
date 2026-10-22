@@ -67,8 +67,7 @@ export type CalendarAppEmits = {
   (event: 'update:events', events: CalendarEvent[]): void
   (event: 'update:date', date: Date): void
   (event: 'update:view', view: CalendarView): void
-  (event: 'create', eventData: CalendarEvent): void
-  (event: 'update', eventData: CalendarEvent): void
+  (event: 'create' | 'update', eventData: CalendarEvent): void
   (event: 'delete', id: string): void
 }
 

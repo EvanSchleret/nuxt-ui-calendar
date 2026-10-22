@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { addDays } from 'date-fns'
 import type { CalendarEvent, CalendarEventModalProps, CalendarEventModalResult } from '../types'
-import { addDays, addMinutes, dateFromLocalDateTime, dateInputValue, localDateTime } from '../utils/dates'
+import { addMinutes, dateFromLocalDateTime, dateInputValue, localDateTime } from '../utils/dates'
 
 const props = defineProps<CalendarEventModalProps>()
 const emit = defineEmits<{ close: [result: CalendarEventModalResult] }>()

@@ -9,19 +9,15 @@
     "url": "git+https://github.com/evanschleret/nuxt-ui-calendar.git"
   },
   "type": "module",
-  "main": "./dist/module.cjs",
   "module": "./dist/module.mjs",
-  "types": "./dist/module.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/module.d.ts",
-      "import": "./dist/module.mjs",
-      "require": "./dist/module.cjs"
+      "types": "./dist/types.d.mts",
+      "import": "./dist/module.mjs"
     },
     "./runtime": {
-      "types": "./dist/runtime.d.ts",
-      "import": "./dist/runtime.mjs",
-      "require": "./dist/runtime.cjs"
+      "types": "./dist/runtime/index.d.ts",
+      "import": "./dist/runtime/index.js"
     },
     "./runtime/types": {
       "types": "./dist/runtime/types.d.ts",
@@ -35,11 +31,12 @@
   "scripts": {
     "build": "nuxt-module-build build",
     "dev": "nuxt-module-build build --stub",
+    "dev:prepare": "nuxt prepare",
     "playground": "nuxt dev playground",
-    "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "typecheck": "vue-tsc --noEmit",
     "test": "bun test",
+    "verify:package": "bun .github/scripts/verify-package.ts",
     "prepublishOnly": "bun run build"
   },
   "dependencies": {
@@ -52,15 +49,16 @@
     "nuxt": ">=4.0.0"
   },
   "devDependencies": {
-    "@nuxt/ui": "^4.12.0",
-    "nuxt": "^4.6.2",
-    "typescript": "^6.0.3",
-    "@nuxt/module-builder": "^1.0.2",
     "@nuxt/eslint": "^1.15.2",
+    "@nuxt/module-builder": "^1.0.2",
+    "@nuxt/ui": "^4.12.0",
+    "@stylistic/eslint-plugin": "^5.10.0",
     "@types/bun": "latest",
     "@types/node": "^26.1.1",
     "eslint": "^10.7.0",
     "eslint-plugin-tailwindcss": "^4.2.0",
+    "nuxt": "^4.6.2",
+    "typescript": "^6.0.3",
     "unbuild": "^3.6.1",
     "vue-tsc": "^3.3.2"
   },

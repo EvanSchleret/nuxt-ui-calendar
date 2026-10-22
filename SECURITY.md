@@ -2,11 +2,11 @@
 
 ## Supported versions
 
-This project is pre-1.0. Security fixes target the latest published release; older releases are not supported.
+Security fixes target the latest published package release. Older package releases are not supported.
 
 | Version | Supported |
 | --- | --- |
-| Latest published `0.x` | Yes |
+| Latest published release | Yes |
 | Earlier versions | No |
 
 ## Reporting a vulnerability

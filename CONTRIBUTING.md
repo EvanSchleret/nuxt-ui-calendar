@@ -29,11 +29,15 @@ The `playground/` directory demonstrates the module in a Nuxt application.
 Before opening a pull request, run the checks relevant to your change:
 
 ```sh
-bun test
+bun run dev:prepare
+bun run lint
 bun run typecheck
+bun run test
+bun run build
+bun run verify:package
 ```
 
-There is no lint script configured at this time. Add or update tests when behavior changes, and update the README when public APIs or usage change.
+The package verification builds a tarball, checks its runtime files and public types, then installs it in a fresh Nuxt consumer and runs Nuxt preparation and Vue type checking. It does not run a Nuxt app build. Add or update tests when behavior changes, and update the README when public APIs or usage change.
 
 ## Pull requests
 
@@ -46,7 +50,9 @@ For questions and feature discussions, use [GitHub Issues](https://github.com/ev
 
 ## Releasing
 
-Maintainers can start a release from the **Release** workflow in GitHub Actions and choose a patch, minor, or major version bump. The workflow runs lint, typecheck, and tests, creates the version commit and tag with Bun, pushes them to GitHub, builds the package, and publishes it to npm with provenance.
+Maintainers start releases from the `main` branch with the **Release** workflow in GitHub Actions and choose a patch, minor, or major version bump. The workflow runs the repository checks, creates the version commit and tag locally, builds and verifies the npm tarball in a fresh Nuxt consumer, then pushes the commit and tag together. Only after that succeeds does it start **Publish** from the exact release tag. That workflow repeats the checks, rebuilds and verifies the same package, and publishes the verified tarball to npm with provenance.
+
+If the Release workflow fails after the tag was pushed, rerun that workflow run; it detects and resumes the tagged version. If publication fails, rerun **Publish** for the same `v<version>` tag. The publish step checks npm first, so a retry after a successful but interrupted publish exits without publishing a duplicate version.
 
 Add an `NPM_TOKEN` Actions secret with publish access to `@evanschleret/nuxt-ui-calendar` before running the workflow. The package is configured for public publication on `https://registry.npmjs.org/`.
 

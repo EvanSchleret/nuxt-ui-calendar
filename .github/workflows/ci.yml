@@ -36,8 +36,16 @@ jobs:
         with:
           bun-version: ${{ matrix.bun }}
 
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22.14.0'
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
+
+      - name: Prepare Nuxt types
+        run: bun run dev:prepare
 
       - name: Lint
         run: bun run lint
@@ -50,3 +58,6 @@ jobs:
 
       - name: Build
         run: bun run build
+
+      - name: Verify packed package in a Nuxt consumer
+        run: bun run verify:package

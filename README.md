@@ -127,11 +127,13 @@ Keyboard shortcuts are `T` for today, `D`, `W` and `M` for views, `N` for a new 
 
 ## Development
 
-The `playground/` directory exercises the module against a small sample calendar. Use Bun for package management and `bun test` for the utility tests.
+The `playground/` directory exercises the module against a small sample calendar. Use Bun for package management. Run `bun run dev:prepare` before the lint and typecheck scripts, and use `bun run verify:package` to check the built tarball in a fresh Nuxt consumer without building the consumer app.
 
-## Project status
+## Versioning and support
 
-This package is in early development. Public APIs may change before a stable release.
+The package is pre-1.0.0, so public APIs may change in minor releases before the first stable release. From 1.0.0 onward, releases follow Semantic Versioning: breaking API changes require a major version.
+
+The peer dependency ranges are Nuxt `>=4.0.0` and Nuxt UI `^4.12.0`. See [SECURITY.md](SECURITY.md) for which package releases receive security fixes.
 
 ## Documentation
 
