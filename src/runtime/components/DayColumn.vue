@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { differenceInMilliseconds } from 'date-fns'
 import { useCalendar } from '#imports'
+import CalendarEventBlock from './EventBlock.vue'
 import type { PositionedCalendarEvent } from '../types'
 import { dateAtMinutes, HOUR_HEIGHT, localDateTime, minutesFromPointer } from '../utils/dates'
 

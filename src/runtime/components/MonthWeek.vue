@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { addDays } from 'date-fns'
 import { useCalendar } from '#imports'
+import CalendarEventChip from './EventChip.vue'
 import type { AllDayPositionedEvent, CalendarEvent } from '../types'
 import { localDateTime } from '../utils/dates'
 import { layoutAllDay } from '../utils/layout'

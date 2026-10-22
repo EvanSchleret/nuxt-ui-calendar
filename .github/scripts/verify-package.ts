@@ -1,4 +1,5 @@
 import { appendFile, cp, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { createServer } from 'node:net'
 import { tmpdir } from 'node:os'
 import { basename, join, resolve } from 'node:path'
 
@@ -109,6 +110,88 @@ async function verifyConsumer(tarball: string, manifest: PackageManifest, direct
   runCommand(['bun', 'install'], consumerDirectory)
   runCommand(['bun', 'run', 'nuxt', 'prepare'], consumerDirectory)
   runCommand(['bun', 'run', 'vue-tsc', '--noEmit', '--project', 'tsconfig.json'], consumerDirectory)
+  await verifyCalendarViews(consumerDirectory)
+}
+
+async function getAvailablePort(): Promise<number> {
+  return await new Promise((resolvePort, reject) => {
+    const server = createServer()
+    server.once('error', reject)
+    server.listen(0, '127.0.0.1', () => {
+      const address = server.address()
+      if (!address || typeof address === 'string') {
+        server.close()
+        reject(new Error('Could not allocate a port for the Nuxt consumer'))
+        return
+      }
+
+      server.close((error) => {
+        if (error) {
+          reject(error)
+          return
+        }
+
+        resolvePort(address.port)
+      })
+    })
+  })
+}
+
+async function fetchNuxtPage(url: string, server: ReturnType<typeof Bun.spawn>): Promise<Response> {
+  const deadline = Date.now() + 60_000
+  let lastError: unknown
+
+  while (Date.now() < deadline) {
+    if (server.exitCode !== null) {
+      throw new Error(`Nuxt dev server exited with code ${server.exitCode}`)
+    }
+
+    try {
+      const response = await fetch(url, { signal: AbortSignal.timeout(10_000) })
+      if (response.status !== 503) {
+        return response
+      }
+
+      lastError = `Nuxt is still starting (HTTP ${response.status})`
+      await response.body?.cancel()
+      await Bun.sleep(500)
+    } catch (error) {
+      lastError = error
+      await Bun.sleep(500)
+    }
+  }
+
+  throw new Error(`Nuxt dev server did not respond: ${String(lastError)}`)
+}
+
+async function verifyCalendarViews(consumerDirectory: string): Promise<void> {
+  const port = await getAvailablePort()
+  const server = Bun.spawn(['bun', 'run', '--bun', 'nuxt', 'dev', '--host', '127.0.0.1', '--port', String(port)], {
+    cwd: consumerDirectory,
+    stdout: 'ignore',
+    stderr: 'ignore'
+  })
+  const baseUrl = `http://127.0.0.1:${port}`
+
+  try {
+    for (const view of ['week', 'month'] as const) {
+      const response = await fetchNuxtPage(`${baseUrl}/${view}`, server)
+      const html = await response.text()
+
+      if (!response.ok) {
+        throw new Error(`Nuxt consumer failed to render the ${view} view (HTTP ${response.status}):\n${html.slice(0, 2000)}`)
+      }
+
+      if (!html.includes(`data-calendar-view="${view}"`)) {
+        throw new Error(`Nuxt consumer response did not contain the ${view} calendar view:\n${html.slice(-4000)}`)
+      }
+    }
+  } finally {
+    if (server.exitCode === null) {
+      server.kill()
+    }
+    await server.exited
+  }
 }
 
 async function main(): Promise<void> {

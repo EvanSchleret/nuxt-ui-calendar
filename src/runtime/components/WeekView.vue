@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef } from 'vue'
 import { differenceInCalendarDays } from 'date-fns'
 import { useCalendar } from '#imports'
+import CalendarDayColumn from './DayColumn.vue'
+import CalendarEventChip from './EventChip.vue'
 import type { AllDayPositionedEvent, CalendarEvent } from '../types'
 import { daysForView, formatCalendarTitle, HOUR_HEIGHT, localDateTime } from '../utils/dates'
 import { layoutAllDay, layoutDay } from '../utils/layout'
@@ -96,7 +98,7 @@ function createAllDay(day: Date) {
 </script>
 
 <template>
-  <div class="relative flex min-h-0 flex-1 flex-col">
+  <div data-calendar-view="week" class="relative flex min-h-0 flex-1 flex-col">
     <UScrollArea
       ref="container"
       :style="{ scrollPaddingTop: chromeOffset }"
@@ -129,7 +131,7 @@ function createAllDay(day: Date) {
     </UScrollArea>
 
     <div
-      class="glass-material absolute inset-x-0 top-[calc(var(--ui-header-height)+0.5rem)] z-30 scrollbar-gutter-stable overflow-hidden border-b border-default bg-(--glass-bg)"
+      class="absolute inset-x-0 top-[calc(var(--ui-header-height)+0.5rem)] z-30 scrollbar-gutter-stable overflow-hidden border-b border-default bg-default"
     >
       <div class="grid" :style="gridStyle">
         <div />

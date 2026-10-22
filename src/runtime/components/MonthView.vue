@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, shallowRef, unref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, shallowRef, unref, useTemplateRef, watch } from 'vue'
 import { addDays, addMonths, addWeeks, differenceInCalendarWeeks, startOfMonth, startOfWeek } from 'date-fns'
 import { useCalendar } from '#imports'
+import CalendarMonthWeek from './MonthWeek.vue'
 import { daysForView, weekDayNames } from '../utils/dates'
 
 const ROW_HEIGHT = 140
@@ -190,7 +191,7 @@ watch(calendar.date, (date) => {
 </script>
 
 <template>
-  <div class="relative flex min-h-0 flex-1 flex-col">
+  <div data-calendar-view="month" class="relative flex min-h-0 flex-1 flex-col">
     <UScrollArea
       v-if="calendar.infiniteScroll"
       ref="scrollArea"
@@ -215,7 +216,7 @@ watch(calendar.date, (date) => {
       />
     </div>
 
-    <div class="glass-material absolute inset-x-0 top-[calc(var(--ui-header-height)+0.5rem)] z-30 grid h-10 scrollbar-gutter-stable grid-cols-7 overflow-hidden border-b border-default bg-(--glass-bg)">
+    <div class="absolute inset-x-0 top-[calc(var(--ui-header-height)+0.5rem)] z-30 grid h-10 scrollbar-gutter-stable grid-cols-7 overflow-hidden border-b border-default bg-default">
       <span
         v-for="(weekday, index) in weekdays"
         :key="weekday"
