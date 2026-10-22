@@ -1,0 +1,18 @@
+@source "../components/**/*.vue";
+
+@layer components {
+  .ui-calendar {
+    --calendar-hour-height: 4rem;
+    min-height: 38rem;
+  }
+
+  .calendar-month-grid > :nth-child(7n) {
+    border-inline-end-width: 0;
+  }
+
+  @media (max-width: 639px) {
+    .ui-calendar {
+      min-height: 32rem;
+    }
+  }
+}
