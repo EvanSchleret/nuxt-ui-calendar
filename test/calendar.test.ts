@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { daysForView, localDateTime } from '../src/runtime/utils/dates'
+import { daysForView, localDateTime, monthViewFocusDate, weekIndexForDate } from '../src/runtime/utils/dates'
 import { hiddenCalendarIdsFor } from '../src/runtime/utils/calendars'
 import { layoutDay } from '../src/runtime/utils/layout'
 import type { CalendarDefinition, CalendarEvent } from '../src/runtime/types'
@@ -17,6 +17,20 @@ describe('calendar date utilities', () => {
 
     expect(daysForView(date, 'week')).toHaveLength(7)
     expect(daysForView(date, 'month')).toHaveLength(42)
+  })
+
+  it('locates the week containing the selected date', () => {
+    const firstWeek = new Date(2026, 9, 5)
+
+    expect(weekIndexForDate(new Date(2026, 9, 22), firstWeek, 10)).toBe(2)
+    expect(weekIndexForDate(new Date(2026, 9, 3), firstWeek, 10)).toBe(0)
+  })
+
+  it('anchors today to the start of its month in the month view', () => {
+    const today = new Date(2026, 9, 22)
+
+    expect(monthViewFocusDate(today, today)).toEqual(new Date(2026, 9, 1))
+    expect(monthViewFocusDate(new Date(2026, 9, 12), today)).toEqual(new Date(2026, 9, 12))
   })
 })
 

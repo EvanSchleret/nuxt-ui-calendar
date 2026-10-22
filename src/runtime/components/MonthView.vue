@@ -3,7 +3,7 @@ import { computed, nextTick, onMounted, onUnmounted, shallowRef, unref, useTempl
 import { addDays, addMonths, addWeeks, differenceInCalendarWeeks, startOfMonth, startOfWeek } from 'date-fns'
 import { useCalendar } from '#imports'
 import CalendarMonthWeek from './MonthWeek.vue'
-import { daysForView, weekDayNames } from '../utils/dates'
+import { daysForView, localDateTime, monthViewFocusDate, weekDayNames, weekIndexForDate } from '../utils/dates'
 
 const ROW_HEIGHT = 140
 const WEEKS_AROUND = 260
@@ -26,12 +26,14 @@ const staticWeeks = computed(() => {
   return Array.from({ length: 6 }, (_, index) => days[index * 7]!)
 })
 const scrollArea = useTemplateRef('scrollArea')
+const staticScrollArea = useTemplateRef('staticScrollArea')
 const scrollElement = shallowRef<HTMLElement | null>(null)
 const labels = shallowRef<{ key: number, month: string, year: string, y: number }[]>([])
 const labelOffsets = new Map<number, number>()
 let viewportHeight = 0
 let labelsAwake = false
 let labelsTimer: ReturnType<typeof setTimeout> | undefined
+let syncingDateFromScroll = false
 
 function indexOf(date: Date): number {
   const start = startOfWeek(startOfMonth(date), { weekStartsOn: 1 })
@@ -39,7 +41,7 @@ function indexOf(date: Date): number {
 }
 
 function initialOffset(): number {
-  return indexOf(calendar.date.value) * ROW_HEIGHT
+  return weekIndexForDate(monthViewFocusDate(calendar.date.value), firstWeek, weeks.length) * ROW_HEIGHT
 }
 
 function getVirtualizer() {
@@ -50,11 +52,37 @@ function getScrollElement(): HTMLElement | null {
   return (getVirtualizer()?.scrollElement as HTMLElement | undefined) ?? null
 }
 
-function scrollToMonth(date: Date, smooth = false) {
-  getVirtualizer()?.scrollToIndex(indexOf(date), {
+function scrollToDate(date: Date, smooth = false) {
+  getVirtualizer()?.scrollToIndex(weekIndexForDate(monthViewFocusDate(date), firstWeek, weeks.length), {
     align: 'start',
     behavior: smooth ? 'smooth' : 'auto'
   })
+}
+
+function isDateWeekVisible(date: Date): boolean {
+  const element = getScrollElement()
+  if (!element) {
+    return false
+  }
+
+  const firstVisible = Math.floor(element.scrollTop / ROW_HEIGHT)
+  const lastVisible = Math.ceil((element.scrollTop + element.clientHeight) / ROW_HEIGHT)
+  const selectedWeek = weekIndexForDate(monthViewFocusDate(date), firstWeek, weeks.length)
+
+  return selectedWeek >= firstVisible && selectedWeek < lastVisible
+}
+
+async function scrollToStaticDate(date: Date) {
+  await nextTick()
+  const element = staticScrollArea.value
+  const focusDate = monthViewFocusDate(date)
+  const dateCell = element?.querySelector<HTMLElement>(`[data-date="${localDateTime(focusDate).slice(0, 10)}"]`)
+  if (!element || !dateCell) {
+    return
+  }
+
+  const offset = dateCell.getBoundingClientRect().top - element.getBoundingClientRect().top + element.scrollTop - CHROME_HEIGHT
+  element.scrollTo({ top: Math.max(0, offset), behavior: 'auto' })
 }
 
 function dockedMonth(): Date | null {
@@ -140,13 +168,20 @@ function onScroll(isScrolling: boolean) {
   }
 
   const visible = dockedMonth()
+  if (isDateWeekVisible(calendar.date.value)) {
+    return
+  }
+
   if (visible && (visible.getFullYear() !== calendar.date.value.getFullYear() || visible.getMonth() !== calendar.date.value.getMonth())) {
+    syncingDateFromScroll = true
     calendar.setDate(visible)
+    syncingDateFromScroll = false
   }
 }
 
 onMounted(async () => {
   if (!calendar.infiniteScroll) {
+    await scrollToStaticDate(calendar.date.value)
     return
   }
 
@@ -174,19 +209,19 @@ onUnmounted(() => {
 })
 
 watch(calendar.date, (date) => {
+  if (syncingDateFromScroll) {
+    return
+  }
+
   if (!calendar.infiniteScroll) {
+    void scrollToStaticDate(date)
     return
   }
 
-  const docked = dockedMonth()
-  if (docked && docked.getFullYear() === date.getFullYear() && docked.getMonth() === date.getMonth()) {
-    return
-  }
-
-  const target = indexOf(date)
+  const target = weekIndexForDate(date, firstWeek, weeks.length)
   const visible = getVirtualizer()?.getVirtualItems()
   const center = visible?.length ? Math.round((visible[0]!.index + visible[visible.length - 1]!.index) / 2) : target
-  scrollToMonth(date, Math.abs(target - center) <= CHUNK_WEEKS * 2)
+  scrollToDate(date, Math.abs(target - center) <= CHUNK_WEEKS * 2)
 }, { flush: 'sync' })
 </script>
 
@@ -207,7 +242,12 @@ watch(calendar.date, (date) => {
       </template>
     </UScrollArea>
 
-    <div v-else class="flex-1 scrollbar-gutter-stable overflow-y-auto" :style="{ paddingTop: `${CHROME_HEIGHT}px` }">
+    <div
+      v-else
+      ref="staticScrollArea"
+      class="flex-1 scrollbar-gutter-stable overflow-y-auto"
+      :style="{ paddingTop: `${CHROME_HEIGHT}px`, scrollPaddingTop: `${CHROME_HEIGHT}px` }"
+    >
       <CalendarMonthWeek
         v-for="week in staticWeeks"
         :key="week.getTime()"

@@ -1,4 +1,4 @@
-import { addDays, addMonths, differenceInCalendarDays, startOfDay, startOfMonth, startOfWeek } from 'date-fns'
+import { addDays, addMonths, differenceInCalendarDays, differenceInCalendarWeeks, startOfDay, startOfMonth, startOfWeek } from 'date-fns'
 import type { CalendarDateRange, CalendarView } from '../types'
 
 export const HOUR_HEIGHT = 64
@@ -82,6 +82,13 @@ export function monthGridRange(date: Date, weekStartsOn = 1): CalendarDateRange 
   return { start, end: addDays(start, 42) }
 }
 
+export function weekIndexForDate(date: Date, firstWeek: Date, weekCount: number): number {
+  const weekStart = startOfWeek(date, { weekStartsOn: 1 })
+  const index = differenceInCalendarWeeks(weekStart, firstWeek, { weekStartsOn: 1 })
+
+  return Math.min(Math.max(index, 0), Math.max(weekCount - 1, 0))
+}
+
 export function stepDate(date: Date, view: CalendarView, direction: -1 | 1): Date {
   if (view === 'month') {
     return addMonths(date, direction)
@@ -92,6 +99,10 @@ export function stepDate(date: Date, view: CalendarView, direction: -1 | 1): Dat
 
 export function isSameDate(left: Date, right: Date): boolean {
   return differenceInCalendarDays(left, right) === 0
+}
+
+export function monthViewFocusDate(date: Date, today = new Date()): Date {
+  return isSameDate(date, today) ? startOfMonth(date) : date
 }
 
 export function eventCoversDay(event: { start: string, end: string }, date: Date): boolean {
