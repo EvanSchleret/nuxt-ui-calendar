@@ -26,7 +26,6 @@ export default defineNuxtModule<NuxtUiCalendarOptions>({
     const { resolve } = createResolver(import.meta.url)
 
     Object.assign(nuxt.options.appConfig.ui, defu(nuxt.options.appConfig.ui, uiDefaults))
-    Object.assign(nuxt.options.appConfig.ui.colors, uiDefaults.colors)
 
     addComponentsDir({
       path: resolve('./runtime/components'),

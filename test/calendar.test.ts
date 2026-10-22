@@ -3,6 +3,7 @@ import { daysForView, localDateTime } from '../src/runtime/utils/dates'
 import { hiddenCalendarIdsFor } from '../src/runtime/utils/calendars'
 import { layoutDay } from '../src/runtime/utils/layout'
 import type { CalendarDefinition, CalendarEvent } from '../src/runtime/types'
+import { uiDefaults } from '../src/ui-config'
 
 describe('calendar date utilities', () => {
   it('formats local datetimes without a timezone suffix', () => {
@@ -45,5 +46,21 @@ describe('calendar visibility', () => {
 
   it('supports hiding every calendar', () => {
     expect(hiddenCalendarIdsFor(calendars, [])).toEqual(['work', 'personal'])
+  })
+})
+
+describe('calendar integration styles', () => {
+  it('generates runtime utilities without resetting the host app styles', async () => {
+    const stylesheet = await Bun.file(new URL('../src/runtime/assets/calendar.css', import.meta.url)).text()
+
+    expect(stylesheet).toContain('@import "tailwindcss/theme.css" layer(theme)')
+    expect(stylesheet).toContain('@import "tailwindcss/utilities.css" layer(utilities)')
+    expect(stylesheet).toContain('@source "../components/**/*.vue"')
+    expect(stylesheet).toContain('--color-primary: var(--ui-primary)')
+    expect(stylesheet).not.toContain('#FF383C')
+  })
+
+  it('inherits semantic colors from the consuming Nuxt UI app', () => {
+    expect(uiDefaults).not.toHaveProperty('colors')
   })
 })

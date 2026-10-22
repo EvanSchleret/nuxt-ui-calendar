@@ -2,10 +2,6 @@ const border = 'border-black/8 dark:border-white/10'
 const divide = 'divide-black/8 dark:divide-white/8'
 
 export const uiDefaults = {
-  colors: {
-    primary: 'red',
-    neutral: 'zinc'
-  },
   commandPalette: {
     slots: {
       root: divide
