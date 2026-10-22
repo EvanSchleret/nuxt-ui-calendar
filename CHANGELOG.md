@@ -13,3 +13,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - Allow using a custom event modal for event creation and editing.
+- Support alpha, beta, and release candidate versions in the release workflow, published under separate npm dist-tags.

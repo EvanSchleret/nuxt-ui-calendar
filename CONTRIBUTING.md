@@ -50,7 +50,9 @@ For questions and feature discussions, use [GitHub Issues](https://github.com/ev
 
 ## Releasing
 
-Maintainers start releases from the `main` branch with the **Release** workflow in GitHub Actions and choose a patch, minor, or major version bump. The workflow runs the repository checks, creates the version commit and tag locally, builds and verifies the npm tarball in a fresh Nuxt consumer, then pushes the commit and tag together. Only after that succeeds does it start **Publish** from the exact release tag. That workflow repeats the checks, rebuilds and verifies the same package, and publishes the verified tarball to npm with provenance.
+Maintainers start releases from the `main` branch with the **Release** workflow in GitHub Actions and choose a patch, minor, major, alpha, beta, or rc release. For alpha, beta, or rc, provide the exact prerelease version, such as `1.0.0-rc.1`. The workflow runs the repository checks, creates the version commit and tag locally, builds and verifies the npm tarball in a fresh Nuxt consumer, then pushes the commit and tag together. Only after that succeeds does it start **Publish** from the exact release tag. That workflow repeats the checks, rebuilds and verifies the same package, and publishes the verified tarball to npm with provenance.
+
+Prereleases are published with the matching npm dist-tag, so they can be installed with `@alpha`, `@beta`, or `@rc` and do not replace `latest`. Each prerelease version must be newer than the current package version. To publish the stable version for the current prerelease train, choose `patch`; for example, `1.0.0-rc.1` becomes `1.0.0`.
 
 If the Release workflow fails after the tag was pushed, rerun that workflow run; it detects and resumes the tagged version. If publication fails, rerun **Publish** for the same `v<version>` tag. The publish step checks npm first, so a retry after a successful but interrupted publish exits without publishing a duplicate version.
 

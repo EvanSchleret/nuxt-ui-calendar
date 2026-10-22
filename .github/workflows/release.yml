@@ -11,6 +11,13 @@ on:
           - patch
           - minor
           - major
+          - alpha
+          - beta
+          - rc
+      prerelease_version:
+        description: Exact version for alpha, beta, or rc releases, such as 1.0.0-rc.1
+        required: false
+        type: string
 
 permissions:
   actions: write
@@ -74,6 +81,7 @@ jobs:
         run: bun .github/scripts/prepare-release.ts
         env:
           RELEASE_TYPE: ${{ inputs.release_type }}
+          PRERELEASE_VERSION: ${{ inputs.prerelease_version }}
 
       - name: Configure git
         if: steps.release_version.outputs.resume != 'true'
@@ -84,10 +92,9 @@ jobs:
       - name: Bump version and create local tag
         if: steps.release_version.outputs.resume != 'true'
         run: |
-          bun pm version "$RELEASE_TYPE" --message='chore(release): %s'
+          bun pm version "$RELEASE_VERSION" --message='chore(release): %s'
           node -e 'const pkg = require("./package.json"); if (pkg.version !== process.env.RELEASE_VERSION) process.exit(1)'
         env:
-          RELEASE_TYPE: ${{ inputs.release_type }}
           RELEASE_VERSION: ${{ steps.release_version.outputs.version }}
 
       - name: Build package

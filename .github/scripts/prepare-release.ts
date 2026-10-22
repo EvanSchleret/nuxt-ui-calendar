@@ -36,10 +36,11 @@ async function isPublished(packageName: string, version: string): Promise<boolea
 async function main(): Promise<void> {
   const manifest = JSON.parse(readFileSync('package.json', 'utf8')) as PackageManifest
   const releaseType = process.env.RELEASE_TYPE as ReleaseType | undefined
+  const prereleaseVersion = process.env.PRERELEASE_VERSION
   const outputFile = process.env.GITHUB_OUTPUT
 
-  if (!releaseType || !['patch', 'minor', 'major'].includes(releaseType)) {
-    throw new Error('RELEASE_TYPE must be patch, minor, or major')
+  if (!releaseType || !['patch', 'minor', 'major', 'alpha', 'beta', 'rc'].includes(releaseType)) {
+    throw new Error('RELEASE_TYPE must be patch, minor, major, alpha, beta, or rc')
   }
 
   if (!outputFile) {
@@ -48,12 +49,13 @@ async function main(): Promise<void> {
 
   runGit(['fetch', 'origin', '+refs/heads/main:refs/remotes/origin/main', '--tags', '--force'])
 
-  const version = nextVersion(manifest.version, releaseType)
+  const version = nextVersion(manifest.version, releaseType, prereleaseVersion)
   const targetTag = `v${version}`
   const existingTag = runGit(['tag', '--list', targetTag])
   const resolution = resolveRelease({
     currentVersion: manifest.version,
     releaseType,
+    prereleaseVersion,
     targetTagExists: Boolean(existingTag),
     targetVersionPublished: existingTag ? false : await isPublished(manifest.name, version)
   })

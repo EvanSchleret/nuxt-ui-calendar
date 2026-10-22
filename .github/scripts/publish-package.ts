@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises'
+import { npmDistTag } from './release-version'
 
 interface PackageManifest {
   name: string
@@ -39,7 +40,7 @@ async function main(): Promise<void> {
   }
 
   const result = Bun.spawnSync({
-    cmd: ['npm', 'publish', tarball, '--provenance', '--access', 'public'],
+    cmd: ['npm', 'publish', tarball, '--provenance', '--access', 'public', '--tag', npmDistTag(releaseVersion)],
     stdout: 'inherit',
     stderr: 'inherit'
   })
