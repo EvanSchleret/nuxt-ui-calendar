@@ -4,7 +4,7 @@ Thanks for helping improve `@evanschleret/nuxt-ui-calendar`.
 
 ## Prerequisites
 
-- Bun 1.3.12 or newer
+- Bun 1.4.3
 - Nuxt 4 and Nuxt UI 4 for the playground
 
 ## Local setup
@@ -43,3 +43,11 @@ There is no lint script configured at this time. Add or update tests when behavi
 - Keep the pull request focused; split unrelated work into separate changes.
 
 For questions and feature discussions, use [GitHub Issues](https://github.com/evanschleret/nuxt-ui-calendar/issues).
+
+## Releasing
+
+Maintainers can start a release from the **Release** workflow in GitHub Actions and choose a patch, minor, or major version bump. The workflow runs lint, typecheck, and tests, creates the version commit and tag with Bun, pushes them to GitHub, builds the package, and publishes it to npm with provenance.
+
+Add an `NPM_TOKEN` Actions secret with publish access to `@evanschleret/nuxt-ui-calendar` before running the workflow. The package is configured for public publication on `https://registry.npmjs.org/`.
+
+After publishing, create a GitHub Release for the new tag. The **Update Changelog** workflow uses its release notes to update `CHANGELOG.md` on `main`.

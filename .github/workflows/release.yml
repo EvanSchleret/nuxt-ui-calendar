@@ -1,0 +1,105 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: Release type
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Version, tag and publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.3'
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22.14.0'
+          check-latest: true
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Update npm
+        run: npm install -g npm@^11.5.1
+
+      - name: Show versions
+        run: |
+          node --version
+          npm --version
+          bun --version
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Test
+        run: bun run test
+
+      - name: Configure git
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+      - name: Resolve release version
+        id: release_version
+        run: |
+          VERSION="$(node -e 'const fs = require("node:fs"); const pkg = JSON.parse(fs.readFileSync("package.json", "utf8")); const parts = pkg.version.split(".").map(Number); const releaseType = process.env.RELEASE_TYPE; const next = releaseType === "major" ? [parts[0] + 1, 0, 0] : releaseType === "minor" ? [parts[0], parts[1] + 1, 0] : [parts[0], parts[1], parts[2] + 1]; process.stdout.write(next.join("."))')"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+          if git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
+            echo 'already_released=true' >> "$GITHUB_OUTPUT"
+            echo "Tag v$VERSION already exists. Skipping release."
+          fi
+        env:
+          RELEASE_TYPE: ${{ inputs.release_type }}
+
+      - name: Bump version
+        if: steps.release_version.outputs.already_released != 'true'
+        run: bun pm version "$RELEASE_TYPE" --message='chore(release): %s'
+        env:
+          RELEASE_TYPE: ${{ inputs.release_type }}
+
+      - name: Push commit and tag
+        if: steps.release_version.outputs.already_released != 'true'
+        run: |
+          git push origin HEAD
+          git push origin --tags
+
+      - name: Build package
+        if: steps.release_version.outputs.already_released != 'true'
+        run: bun run build
+
+      - name: Publish package
+        if: steps.release_version.outputs.already_released != 'true'
+        run: npm publish --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

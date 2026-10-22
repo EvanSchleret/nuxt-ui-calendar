@@ -1,0 +1,8 @@
+node_modules
+.idea
+dist
+.nuxt
+.output
+coverage
+playground/.nuxt
+playground/.output
