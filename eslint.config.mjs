@@ -1,3 +1,4 @@
+// @ts-check
 import withNuxt from './.nuxt/eslint.config.mjs'
 import stylistic from '@stylistic/eslint-plugin'
 import tailwind from 'eslint-plugin-tailwindcss'
@@ -16,6 +17,8 @@ export default withNuxt(
     rules: {
       '@stylistic/indent': ['error', 2],
       'vue/html-indent': ['error', 2],
+      '@typescript-eslint/no-explicit-any': 'off',
+      'no-explicit-any': 'off',
       'vue/multi-word-component-names': 'off',
       'tailwindcss/no-custom-classname': 'off'
     }
