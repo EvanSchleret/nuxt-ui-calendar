@@ -45,6 +45,8 @@ export default defineAppConfig({
 
 Use `v-model:date` and `v-model:view` when the host router should control the selected range. The `initialDate` and `initialView` props set an uncontrolled starting point.
 
+Calendar dates and labels inherit the locale configured on the host app's `<UApp :locale="...">`. Set the `locale` prop on `CalendarApp` to override it for this calendar.
+
 ## Customize the toolbar
 
 `CalendarApp` exposes scoped slots for the view selector and range navigation. Each slot receives the current `date` and `view`, plus `setView`, `goToPrevious`, `goToToday` and `goToNext` actions. The `view-switcher` slot also receives the supported `views` (`day`, `week` and `month`). Leaving a slot unused keeps its default control. Set `view-switcher-placement="right"` to move the default selector or your custom `view-switcher` slot after the toolbar actions; the default placement is `center`.

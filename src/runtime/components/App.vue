@@ -12,7 +12,6 @@ const props = withDefaults(defineProps<CalendarAppProps>(), {
   calendars: () => [],
   initialView: 'week',
   viewSwitcherPlacement: 'center',
-  locale: 'en-US',
   shortcuts: false,
   infiniteScroll: true
 })

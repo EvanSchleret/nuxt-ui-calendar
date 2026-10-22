@@ -64,7 +64,7 @@ export function useCalendar(): CalendarController {
   return calendar
 }
 
-export function createCalendarController(props: CalendarAppProps, emit: CalendarAppEmits): CalendarController {
+export function createCalendarController(props: CalendarAppProps, emit: CalendarAppEmits, appLocale: Ref<string>): CalendarController {
   const toast = useToast()
   const overlay = useOverlay()
   const eventModal = overlay.create(props.eventModal ?? EventModal)
@@ -259,7 +259,7 @@ export function createCalendarController(props: CalendarAppProps, emit: Calendar
       calendars: calendars.value,
       initialStart: start,
       allDay,
-      locale: props.locale ?? 'en-US'
+      locale: props.locale ?? appLocale.value
     }) as CalendarEventModalResult | undefined
     overlayOpen = false
 
@@ -302,7 +302,7 @@ export function createCalendarController(props: CalendarAppProps, emit: Calendar
     const result = await searchModal.open({
       events: visibleEvents.value,
       calendars: calendars.value,
-      locale: props.locale ?? 'en-US',
+      locale: props.locale ?? appLocale.value,
       shortcuts: props.shortcuts ?? false,
       view: view.value,
       hiddenCalendarIds: hiddenCalendarIds.value,
@@ -365,7 +365,9 @@ export function createCalendarController(props: CalendarAppProps, emit: Calendar
     pendingCount,
     error,
     monthLabelsVisible,
-    locale: props.locale ?? 'en-US',
+    get locale() {
+      return props.locale ?? appLocale.value
+    },
     shortcuts: props.shortcuts ?? false,
     infiniteScroll: props.infiniteScroll ?? true,
     setDate,

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useLocale } from '@nuxt/ui/composables'
 import { createCalendarController, provideCalendar } from '#imports'
 import CalendarMonthView from './MonthView.vue'
 import CalendarToolbar from './Toolbar.vue'
@@ -9,7 +10,8 @@ import { formatCalendarTitle } from '../utils/dates'
 
 const props = defineProps<CalendarAppProps>()
 const emit = defineEmits<CalendarAppEmits>()
-const calendar = createCalendarController(props, emit)
+const { code: appLocale } = useLocale()
+const calendar = createCalendarController(props, emit, appLocale)
 provideCalendar(calendar)
 
 const title = computed(() => formatCalendarTitle(calendar.date.value, calendar.view.value, calendar.locale))
