@@ -4,36 +4,59 @@ import { useCalendar } from '#imports'
 import type { CalendarColor, CalendarEvent, PositionedCalendarEvent } from '../types'
 import { addMinutes, localDateTime, SNAP_MINUTES } from '../utils/dates'
 
-const props = withDefaults(defineProps<{
+const props = defineProps<{
   event: CalendarEvent
   positioned?: PositionedCalendarEvent
-  compact?: boolean
-}>(), {
-  compact: false
-})
+}>()
 
 const calendar = useCalendar()
 const previewEnd = ref<Date | null>(null)
 
-const colorClasses: Record<CalendarColor, string> = {
-  primary: 'border-primary/50 bg-primary/15 text-primary hover:bg-primary/25',
-  secondary: 'border-secondary/50 bg-secondary/15 text-secondary hover:bg-secondary/25',
-  info: 'border-info/50 bg-info/15 text-info hover:bg-info/25',
-  success: 'border-success/50 bg-success/15 text-success hover:bg-success/25',
-  warning: 'border-warning/50 bg-warning/15 text-warning hover:bg-warning/25',
-  error: 'border-error/50 bg-error/15 text-error hover:bg-error/25'
+const eventBlockClasses: Record<CalendarColor, string> = {
+  primary: 'bg-primary/15 hover:bg-primary/25 data-active:bg-primary/25 text-primary border-primary',
+  secondary: 'bg-secondary/15 hover:bg-secondary/25 data-active:bg-secondary/25 text-secondary border-secondary',
+  info: 'bg-info/15 hover:bg-info/25 data-active:bg-info/25 text-info border-info',
+  success: 'bg-success/15 hover:bg-success/25 data-active:bg-success/25 text-success border-success',
+  warning: 'bg-warning/15 hover:bg-warning/25 data-active:bg-warning/25 text-warning border-warning',
+  error: 'bg-error/15 hover:bg-error/25 data-active:bg-error/25 text-error border-error'
+}
+
+const calendarDotClasses: Record<CalendarColor, string> = {
+  primary: 'bg-primary',
+  secondary: 'bg-secondary',
+  info: 'bg-info',
+  success: 'bg-success',
+  warning: 'bg-warning',
+  error: 'bg-error'
+}
+
+const eventOutlineClasses: Record<CalendarColor, string> = {
+  primary: 'outline-primary/25',
+  secondary: 'outline-secondary/25',
+  info: 'outline-info/25',
+  success: 'outline-success/25',
+  warning: 'outline-warning/25',
+  error: 'outline-error/25'
 }
 
 const calendarColor = computed(() => calendar.calendars.value.find(item => item.id === props.event.calendarId)?.color ?? 'primary')
-const timeLabel = computed(() => new Intl.DateTimeFormat(calendar.locale, { hour: 'numeric', minute: '2-digit' }).format(new Date(props.event.start)))
+const timeRange = computed(() => {
+  const format = new Intl.DateTimeFormat(calendar.locale, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+  return `${format.format(new Date(props.event.start))} – ${format.format(new Date(props.event.end))}`
+})
+const compact = computed(() => !!props.positioned && props.positioned.height < 40)
 const eventStyle = computed(() => {
   if (!props.positioned) {
     return undefined
   }
 
+  const height = previewEnd.value
+    ? Math.max(30, (previewEnd.value.getTime() - new Date(props.event.start).getTime()) / 60_000 * 64 / 60)
+    : props.positioned.height
+
   return {
-    top: `${props.positioned.top + 1}px`,
-    height: `${(previewEnd.value ? Math.max(20, (previewEnd.value.getTime() - new Date(props.event.start).getTime()) / 60_000 * 64 / 60) : props.positioned.height) - 2}px`,
+    top: `${props.positioned.top + 2}px`,
+    height: `${height - 3}px`,
     insetInlineStart: `calc(${props.positioned.left}% + 1px)`,
     width: `calc(${props.positioned.width}% - 2px)`
   }
@@ -78,55 +101,33 @@ function startResize(event: PointerEvent) {
   document.addEventListener('pointerup', onUp)
   document.addEventListener('pointercancel', onUp)
 }
-
-function resizeWithKeyboard(event: KeyboardEvent) {
-  if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') {
-    return
-  }
-
-  event.preventDefault()
-  const adjustment = event.key === 'ArrowUp' ? -SNAP_MINUTES : SNAP_MINUTES
-  const end = addMinutes(new Date(props.event.end), adjustment)
-  if (end > new Date(props.event.start)) {
-    void calendar.updateEvent({ ...props.event, end: localDateTime(end) })
-  }
-}
 </script>
 
 <template>
-  <div
+  <button
+    type="button"
+    data-event
+    class="absolute flex flex-col items-start overflow-hidden rounded-xs px-3 py-1 text-left text-xs transition-colors select-none focus-visible:outline-3"
+    :class="[eventBlockClasses[calendarColor], eventOutlineClasses[calendarColor], 'z-10']"
     :style="eventStyle"
-    :class="[
-      'group min-w-0 overflow-hidden rounded-md border-l-2 text-xs',
-      positioned ? 'absolute z-10' : '',
-      compact ? 'min-h-5 w-full text-[11px] leading-5' : ''
-    ]"
+    :draggable="true"
+    :aria-label="`${event.title}, ${timeRange}`"
+    @click.stop="calendar.openEvent(event)"
+    @dragstart="onDragStart"
+    @dblclick.stop
   >
-    <button
-      type="button"
-      :aria-label="event.allDay ? `${event.title}, all day` : `${event.title}, ${timeLabel}`"
-      :draggable="true"
-      :class="[
-        'flex size-full min-w-0 cursor-pointer flex-col overflow-hidden px-1.5 py-1 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary',
-        colorClasses[calendarColor],
-        compact ? 'min-h-5 border-0 px-1 py-0 text-[11px] leading-5' : ''
-      ]"
-      @click.stop="calendar.openEvent(event)"
-      @dragstart="onDragStart"
-      @dblclick.stop
-    >
-      <span class="truncate font-medium">{{ event.title || 'Untitled event' }}</span>
-      <span v-if="!compact && !event.allDay" class="truncate text-[10px] opacity-75">{{ timeLabel }}</span>
-      <span v-if="compact && !event.allDay" class="hidden truncate text-[10px] opacity-75 sm:inline">{{ timeLabel }}</span>
-    </button>
-    <button
-      v-if="positioned && !event.allDay"
-      type="button"
-      class="absolute inset-x-0 bottom-0 z-10 h-2 cursor-ns-resize bg-transparent opacity-0 group-hover:opacity-100 focus:opacity-100"
+    <span class="absolute inset-y-1 inset-s-1 w-1 rounded-full" :class="calendarDotClasses[calendarColor]" />
+    <span class="w-full truncate font-medium">{{ event.title }}</span>
+    <span v-if="!compact" class="w-full truncate text-[10px] tabular-nums opacity-80">{{ timeRange }}</span>
+    <span
+      v-if="!event.allDay"
+      data-resize-handle
+      role="separator"
+      aria-orientation="horizontal"
       :aria-label="`Resize ${event.title}`"
+      tabindex="0"
+      class="absolute inset-x-0 bottom-0 h-2 cursor-ns-resize"
       @pointerdown="startResize"
-      @keydown="resizeWithKeyboard"
-      @click.stop
     />
-  </div>
+  </button>
 </template>

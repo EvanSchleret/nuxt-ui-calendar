@@ -1,93 +1,245 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { addDays, differenceInCalendarDays } from 'date-fns'
+import { computed, nextTick, onMounted, onUnmounted, shallowRef, unref, watch } from 'vue'
+import { addDays, addMonths, addWeeks, differenceInCalendarWeeks, startOfMonth, startOfWeek } from 'date-fns'
 import { useCalendar } from '#imports'
-import type { CalendarEvent } from '../types'
-import { daysForView, isDateInMonth, localDateTime, weekDayNames } from '../utils/dates'
+import { daysForView, weekDayNames } from '../utils/dates'
+
+const ROW_HEIGHT = 140
+const WEEKS_AROUND = 260
+const HEADER_PADDING = 8
+const HEADER_HEIGHT = 64
+const WEEKDAY_HEIGHT = 40
+const CHROME_HEIGHT = HEADER_PADDING + HEADER_HEIGHT + WEEKDAY_HEIGHT
+const LABEL_HEIGHT = 32
+const LABEL_LIFT = 12
+const DOCK_TOP = HEADER_PADDING + (HEADER_HEIGHT - 1 - LABEL_HEIGHT) / 2
+const GRID_TOP = CHROME_HEIGHT - DOCK_TOP
+const CHUNK_WEEKS = 6
 
 const calendar = useCalendar()
-const days = computed(() => daysForView(calendar.date.value, 'month'))
+const firstWeek = startOfWeek(addWeeks(new Date(), -WEEKS_AROUND), { weekStartsOn: 1 })
+const weeks = Array.from({ length: WEEKS_AROUND * 2 + 1 }, (_, index) => addWeeks(firstWeek, index))
 const weekdays = computed(() => weekDayNames(calendar.locale))
+const staticWeeks = computed(() => {
+  const days = daysForView(calendar.date.value, 'month')
+  return Array.from({ length: 6 }, (_, index) => days[index * 7]!)
+})
+const scrollArea = useTemplateRef('scrollArea')
+const scrollElement = shallowRef<HTMLElement | null>(null)
+const labels = shallowRef<{ key: number, month: string, year: string, y: number }[]>([])
+const labelOffsets = new Map<number, number>()
+let viewportHeight = 0
+let labelsAwake = false
+let labelsTimer: ReturnType<typeof setTimeout> | undefined
 
-function dayEvents(day: Date): CalendarEvent[] {
-  return calendar.eventsForDay(day)
+function indexOf(date: Date): number {
+  const start = startOfWeek(startOfMonth(date), { weekStartsOn: 1 })
+  return Math.min(weeks.length - 1, Math.max(0, differenceInCalendarWeeks(start, firstWeek, { weekStartsOn: 1 })))
 }
 
-function createAllDay(day: Date) {
-  void calendar.openEvent(undefined, day, true)
+function initialOffset(): number {
+  return indexOf(calendar.date.value) * ROW_HEIGHT
 }
 
-function dropEvent(day: Date, dragEvent: DragEvent) {
-  dragEvent.preventDefault()
-  const id = dragEvent.dataTransfer?.getData('text/plain')
-  const event = calendar.events.value.find(item => item.id === id)
-  if (!event) {
+function getVirtualizer() {
+  return unref(scrollArea.value?.virtualizer)
+}
+
+function getScrollElement(): HTMLElement | null {
+  return (getVirtualizer()?.scrollElement as HTMLElement | undefined) ?? null
+}
+
+function scrollToMonth(date: Date, smooth = false) {
+  getVirtualizer()?.scrollToIndex(indexOf(date), {
+    align: 'start',
+    behavior: smooth ? 'smooth' : 'auto'
+  })
+}
+
+function dockedMonth(): Date | null {
+  const offset = scrollElement.value?.scrollTop ?? getScrollElement()?.scrollTop
+  if (offset == null) {
+    return null
+  }
+
+  const top = Math.min(weeks.length - 1, Math.max(0, Math.floor(offset / ROW_HEIGHT)))
+  const week = weeks[top]
+  return week ? startOfMonth(addDays(week, 6)) : null
+}
+
+function monthKey(date: Date): number {
+  return date.getFullYear() * 12 + date.getMonth()
+}
+
+function labelOffset(date: Date): number {
+  const key = monthKey(date)
+  let offset = labelOffsets.get(key)
+  if (offset === undefined) {
+    offset = indexOf(startOfMonth(date)) * ROW_HEIGHT
+    labelOffsets.set(key, offset)
+  }
+  return offset
+}
+
+function updateLabels(docked: Date) {
+  const offset = scrollElement.value?.scrollTop
+  if (offset == null) {
     return
   }
 
-  const start = new Date(event.start)
-  const end = new Date(event.end)
-  const dayDelta = differenceInCalendarDays(day, start)
-  const movedStart = addDays(start, dayDelta)
-  const movedEnd = addDays(end, dayDelta)
+  const months = [docked]
+  while (months.length < 4) {
+    const next = addMonths(months[months.length - 1]!, 1)
+    if (labelOffset(next) > offset + viewportHeight) {
+      break
+    }
+    months.push(next)
+  }
 
-  void calendar.updateEvent({ ...event, start: localDateTime(movedStart), end: localDateTime(movedEnd) })
+  const positions = months.map((month) => {
+    const distance = labelOffset(month) - offset
+    return Math.max((distance >= GRID_TOP ? GRID_TOP + distance : distance * 2) - LABEL_LIFT, 0)
+  })
+
+  for (let index = positions.length - 2; index >= 0; index--) {
+    positions[index] = Math.min(positions[index]!, positions[index + 1]! - LABEL_HEIGHT)
+  }
+
+  labels.value = months.map((month, index) => ({
+    key: monthKey(month),
+    month: new Intl.DateTimeFormat(calendar.locale, { month: 'long' }).format(month),
+    year: String(month.getFullYear()),
+    y: positions[index]!
+  }))
 }
+
+function updateScrollState() {
+  const docked = dockedMonth()
+  if (!docked) {
+    return
+  }
+
+  updateLabels(docked)
+  if (!labelsAwake) {
+    return
+  }
+
+  calendar.monthLabelsVisible.value = true
+  if (labelsTimer) {
+    clearTimeout(labelsTimer)
+  }
+  labelsTimer = setTimeout(() => {
+    calendar.monthLabelsVisible.value = false
+  }, 600)
+}
+
+function onScroll(isScrolling: boolean) {
+  if (isScrolling || !calendar.infiniteScroll) {
+    return
+  }
+
+  const visible = dockedMonth()
+  if (visible && (visible.getFullYear() !== calendar.date.value.getFullYear() || visible.getMonth() !== calendar.date.value.getMonth())) {
+    calendar.setDate(visible)
+  }
+}
+
+onMounted(async () => {
+  if (!calendar.infiniteScroll) {
+    return
+  }
+
+  await nextTick()
+  const element = getScrollElement()
+  if (!element) {
+    return
+  }
+
+  scrollElement.value = element
+  viewportHeight = element.clientHeight
+  element.addEventListener('scroll', updateScrollState, { passive: true })
+  updateScrollState()
+  requestAnimationFrame(() => {
+    labelsAwake = true
+  })
+})
+
+onUnmounted(() => {
+  scrollElement.value?.removeEventListener('scroll', updateScrollState)
+  if (labelsTimer) {
+    clearTimeout(labelsTimer)
+  }
+  calendar.monthLabelsVisible.value = false
+})
+
+watch(calendar.date, (date) => {
+  if (!calendar.infiniteScroll) {
+    return
+  }
+
+  const docked = dockedMonth()
+  if (docked && docked.getFullYear() === date.getFullYear() && docked.getMonth() === date.getMonth()) {
+    return
+  }
+
+  const target = indexOf(date)
+  const visible = getVirtualizer()?.getVirtualItems()
+  const center = visible?.length ? Math.round((visible[0]!.index + visible[visible.length - 1]!.index) / 2) : target
+  scrollToMonth(date, Math.abs(target - center) <= CHUNK_WEEKS * 2)
+}, { flush: 'sync' })
 </script>
 
 <template>
-  <div class="flex min-h-0 flex-1 flex-col overflow-hidden">
-    <div class="grid grid-cols-7 border-b border-default bg-default/90">
-      <div v-for="weekday in weekdays" :key="weekday" class="py-2 text-center text-xs font-medium text-muted">{{ weekday }}</div>
+  <div class="relative flex min-h-0 flex-1 flex-col">
+    <UScrollArea
+      v-if="calendar.infiniteScroll"
+      ref="scrollArea"
+      :items="weeks"
+      :virtualize="{ estimateSize: ROW_HEIGHT, skipMeasurement: true, overscan: 4, paddingStart: CHROME_HEIGHT, scrollPaddingStart: CHROME_HEIGHT, initialOffset }"
+      :ui="{ item: 'snap-start' }"
+      :style="{ scrollPaddingTop: `${CHROME_HEIGHT}px` }"
+      class="flex-1 snap-y snap-proximity scrollbar-gutter-stable"
+      @scroll="onScroll"
+    >
+      <template #default="{ item }">
+        <CalendarMonthWeek :week-start="item" :style="{ height: `${ROW_HEIGHT}px` }" />
+      </template>
+    </UScrollArea>
+
+    <div v-else class="flex-1 scrollbar-gutter-stable overflow-y-auto" :style="{ paddingTop: `${CHROME_HEIGHT}px` }">
+      <CalendarMonthWeek
+        v-for="week in staticWeeks"
+        :key="week.getTime()"
+        :week-start="week"
+        :style="{ height: `${ROW_HEIGHT}px` }"
+      />
     </div>
 
-    <div class="calendar-month-grid grid min-h-0 flex-1 grid-cols-7 grid-rows-6">
-      <div
-        v-for="day in days"
-        :key="localDateTime(day).slice(0, 10)"
-        :data-date="localDateTime(day).slice(0, 10)"
-        class="group min-h-20 overflow-hidden border-r border-b border-default p-1 sm:p-2"
-        :class="isDateInMonth(day, calendar.date.value) ? 'bg-default' : 'bg-elevated/30'"
-        @dblclick="createAllDay(day)"
-        @dragover.prevent
-        @drop="dropEvent(day, $event)"
+    <div class="glass-material absolute inset-x-0 top-[calc(var(--ui-header-height)+0.5rem)] z-30 grid h-10 scrollbar-gutter-stable grid-cols-7 overflow-hidden border-b border-default bg-(--glass-bg)">
+      <span
+        v-for="(weekday, index) in weekdays"
+        :key="weekday"
+        class="flex items-center justify-end border-default pe-2 text-sm text-muted"
+        :class="index !== 0 && 'border-s'"
       >
-        <div class="mb-1 flex items-center justify-between">
-          <button
-            type="button"
-            class="flex size-7 items-center justify-center rounded-full text-xs font-medium text-muted hover:bg-elevated focus-visible:outline-2 focus-visible:outline-primary"
-            :class="day.toDateString() === new Date().toDateString() ? 'bg-primary text-inverted hover:bg-primary' : ''"
-            :aria-label="`Open ${day.toLocaleDateString(calendar.locale, { dateStyle: 'full' })}`"
-            @click="calendar.setDate(day); calendar.setView('day')"
-          >
-            {{ day.getDate() }}
-          </button>
-          <UButton
-            icon="i-lucide-plus"
-            color="neutral"
-            variant="ghost"
-            size="xs"
-            class="opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
-            aria-label="Create event on this day"
-            @click="createAllDay(day)"
-          />
-        </div>
-        <div class="flex flex-col gap-0.5">
-          <CalendarEventBlock
-            v-for="event in dayEvents(day).slice(0, 4)"
-            :key="`${day.toISOString()}-${event.id}`"
-            :event="event"
-            compact
-          />
-          <button
-            v-if="dayEvents(day).length > 4"
-            type="button"
-            class="px-1 text-left text-[11px] font-medium text-muted hover:text-highlighted"
-            @click="calendar.setDate(day); calendar.setView('day')"
-          >
-            +{{ dayEvents(day).length - 4 }} more
-          </button>
-        </div>
+        {{ weekday }}
+      </span>
+    </div>
+
+    <div
+      v-if="calendar.infiniteScroll"
+      class="pointer-events-none absolute inset-x-0 bottom-0 z-40 overflow-hidden transition-opacity"
+      :class="calendar.monthLabelsVisible.value ? 'opacity-100 duration-150' : 'opacity-0 duration-300'"
+      :style="{ top: `${DOCK_TOP}px` }"
+    >
+      <div
+        v-for="label in labels"
+        :key="label.key"
+        class="absolute inset-s-13 top-0 flex h-8 items-center gap-1.5 text-xl tracking-tight will-change-[translate] sm:text-2xl lg:inset-s-4"
+        :style="{ translate: `0 ${label.y}px` }"
+      >
+        <span class="truncate font-bold text-highlighted">{{ label.month }}</span>
+        <span class="hidden font-normal text-muted sm:inline">{{ label.year }}</span>
       </div>
     </div>
   </div>

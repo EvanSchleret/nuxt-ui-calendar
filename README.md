@@ -2,7 +2,7 @@
 
 A Nuxt module that provides the Calendar template's core UI and interactions as reusable components and composables. It includes day, week and month views, a responsive sidebar with a mini calendar, event editing and search overlays, drag and resize gestures, keyboard shortcuts, calendar visibility filters, optimistic updates, and an offline mutation queue.
 
-The module provides client-side UI. The host application owns event loading and persistence through props and an optional adapter.
+The module provides client-side UI. The host application owns event loading and persistence through props and an optional adapter. `calendars` is optional; omit it to use the calendar without calendar filters or calendar assignments.
 
 Based on the [Nuxt UI Calendar template](https://github.com/nuxt-ui-templates/calendar), distributed under the MIT license.
 
@@ -30,8 +30,56 @@ export default defineNuxtConfig({
 ```
 
 `CalendarApp` provides a `UApp` boundary for its overlays and toast feedback.
+It also provides the template's Nuxt UI theme defaults and exposes a `sidebar-footer` slot for host-specific account controls.
+
+Buttons, checkboxes, badges and tabs use Nuxt UI's default component shapes. Customize their defaults centrally with Nuxt UI's `app.config.ts`:
+
+```ts
+export default defineAppConfig({
+  ui: {
+    button: { slots: { base: 'rounded-lg' } },
+    checkbox: { slots: { base: 'rounded-md' } },
+    badge: { slots: { base: 'rounded-full' } }
+  }
+})
+```
 
 Use `v-model:date` and `v-model:view` when the host router should control the selected range. The `initialDate` and `initialView` props set an uncontrolled starting point.
+
+## Customize the toolbar
+
+`CalendarApp` exposes scoped slots for the view selector and range navigation. Each slot receives the current `date` and `view`, plus `setView`, `goToPrevious`, `goToToday` and `goToNext` actions. The `view-switcher` slot also receives the supported `views` (`day`, `week` and `month`). Leaving a slot unused keeps its default control. Set `view-switcher-placement="right"` to move the default selector or your custom `view-switcher` slot after the toolbar actions; the default placement is `center`.
+
+```vue
+<CalendarApp v-model:events="events" view-switcher-placement="right">
+  <template #view-switcher="{ view, views, setView }">
+    <div role="group" aria-label="Calendar view" class="flex gap-1">
+      <UButton
+        v-for="option in views"
+        :key="option"
+        :variant="view === option ? 'solid' : 'ghost'"
+        @click="setView(option)"
+      >
+        {{ option }}
+      </UButton>
+    </div>
+  </template>
+
+  <template #previous="{ goToPrevious }">
+    <UButton icon="i-lucide-chevron-left" aria-label="Previous range" @click="goToPrevious" />
+  </template>
+
+  <template #today="{ goToToday }">
+    <UButton label="Today" @click="goToToday" />
+  </template>
+
+  <template #next="{ goToNext }">
+    <UButton icon="i-lucide-chevron-right" aria-label="Next range" @click="goToNext" />
+  </template>
+</CalendarApp>
+```
+
+The slot context is typed as `CalendarToolbarSlotProps` from `@evanschleret/nuxt-ui-calendar/runtime/types`.
 
 ## Use
 
@@ -78,9 +126,15 @@ const adapter = {
 
 When no `adapter` is provided, changes update `v-model:events` immediately and emit `create`, `update` and `delete` events for the host to persist. With an adapter, mutations are optimistic, queued in local storage while offline, and replayed when the browser reconnects.
 
+For standalone events that do not belong to a named calendar, omit `calendarId` and `calendars`:
+
+```vue
+<CalendarApp v-model:events="events" />
+```
+
 ## Custom event modal
 
-Pass your own Vue component through `eventModal` to replace the built-in create and edit modal. The component receives `event`, `calendars`, `initialStart`, `allDay` and `locale`, and must emit the typed `close` result. This same component opens from double-clicks, the create buttons and the `N` shortcut.
+Pass your own Vue component through `eventModal` to replace the built-in create and edit modal. The component receives `event`, `calendars`, `initialStart`, `allDay` and `locale`, and must emit the typed `close` result. This same component opens from double-clicks and the create buttons. Keyboard shortcuts are opt-in with the `shortcuts` prop.
 
 ```vue
 <script setup lang="ts">
@@ -123,7 +177,7 @@ The module auto-registers these components with the configured prefix:
 
 `useCalendar()` returns the current date, view, visible events, calendars, navigation actions, event mutations and overlay actions inside `CalendarApp`. `useCalendarEvents()` provides visible events and an `eventsForDay` selector.
 
-Keyboard shortcuts are `T` for today, `D`, `W` and `M` for views, `N` for a new event, `⌘K` / `Ctrl+K` for search and the arrow keys for previous and next ranges.
+`shortcuts` enables `T` for today, `D`, `W` and `M` for views, `N` for a new event, `⌘K` / `Ctrl+K` for search and the arrow keys for previous and next ranges. It defaults to `false`, and the calendar does not display shortcut help. `infiniteScroll` controls month-view scrolling and defaults to `true`; set it to `false` to show the current six-week month grid without extending it while scrolling.
 
 ## Development
 

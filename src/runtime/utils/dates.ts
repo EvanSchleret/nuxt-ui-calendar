@@ -45,30 +45,31 @@ export function rangeForView(date: Date, view: CalendarView, weekStartsOn = 1): 
   return { start, end: addDays(start, days.length) }
 }
 
-export function formatCalendarTitle(date: Date, view: CalendarView, locale = 'en-US'): string {
+export interface CalendarTitle {
+  months: string
+  year: string
+}
+
+export function formatCalendarTitle(date: Date, view: CalendarView, locale = 'en-US'): CalendarTitle {
+  const months = new Intl.DateTimeFormat(locale, { month: 'long' })
+  const shortMonths = new Intl.DateTimeFormat(locale, { month: 'short' })
+  const shortMonthYear = new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric' })
+
   if (view === 'month') {
-    return new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(date)
+    return { months: months.format(date), year: String(date.getFullYear()) }
   }
 
-  if (view === 'day') {
-    return new Intl.DateTimeFormat(locale, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).format(date)
-  }
-
-  const days = daysForView(date, 'week')
+  const days = daysForView(date, view)
   const first = days[0] ?? date
-  const last = days[6] ?? date
-  const monthYear = new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric' })
-  const month = new Intl.DateTimeFormat(locale, { month: 'short' })
+  const last = days[days.length - 1] ?? date
+  const year = String(last.getFullYear())
 
-  if (first.getFullYear() !== last.getFullYear()) {
-    return `${monthYear.format(first)} – ${monthYear.format(last)}`
+  if (first.getFullYear() === last.getFullYear() && first.getMonth() === last.getMonth()) {
+    return { months: months.format(first), year }
   }
 
-  if (first.getMonth() === last.getMonth()) {
-    return `${new Intl.DateTimeFormat(locale, { month: 'long' }).format(first)} ${first.getDate()}–${last.getDate()}, ${last.getFullYear()}`
-  }
-
-  return `${month.format(first)} ${first.getDate()} – ${month.format(last)} ${last.getDate()}, ${last.getFullYear()}`
+  const firstMonth = first.getFullYear() === last.getFullYear() ? shortMonths.format(first) : shortMonthYear.format(first)
+  return { months: `${firstMonth} – ${shortMonths.format(last)}`, year }
 }
 
 export function formatMonthLabel(date: Date, locale = 'en-US'): string {

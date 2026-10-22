@@ -1,7 +1,25 @@
-import type { Component, Ref } from 'vue'
+import type { Component, Ref, VNode } from 'vue'
 
 export type CalendarView = 'day' | 'week' | 'month'
 export type CalendarColor = 'primary' | 'secondary' | 'info' | 'success' | 'warning' | 'error'
+
+export interface CalendarToolbarSlotProps {
+  date: Date
+  view: CalendarView
+  views: readonly CalendarView[]
+  setView: (view: CalendarView) => void
+  goToPrevious: () => void
+  goToToday: () => void
+  goToNext: () => void
+}
+
+export interface CalendarAppSlots {
+  'sidebar-footer'?: () => VNode[]
+  'view-switcher'?: (props: CalendarToolbarSlotProps) => VNode[]
+  previous?: (props: CalendarToolbarSlotProps) => VNode[]
+  today?: (props: CalendarToolbarSlotProps) => VNode[]
+  next?: (props: CalendarToolbarSlotProps) => VNode[]
+}
 
 export interface CalendarDefinition {
   id: string
@@ -11,7 +29,7 @@ export interface CalendarDefinition {
 
 export interface CalendarEvent {
   id: string
-  calendarId: string
+  calendarId?: string
   title: string
   description?: string
   start: string
@@ -57,10 +75,13 @@ export interface CalendarAppProps {
   eventModal?: CalendarEventModalComponent
   date?: Date | string
   view?: CalendarView
+  viewSwitcherPlacement?: 'center' | 'right'
   initialDate?: Date | string
   initialView?: CalendarView
   storageKey?: string
   locale?: string
+  shortcuts?: boolean
+  infiniteScroll?: boolean
 }
 
 export type CalendarAppEmits = {
@@ -81,7 +102,10 @@ export interface CalendarController {
   online: Ref<boolean>
   pendingCount: Ref<number>
   error: Ref<string | null>
+  monthLabelsVisible: Ref<boolean>
   locale: string
+  shortcuts: boolean
+  infiniteScroll: boolean
   setDate: (date: Date) => void
   setView: (view: CalendarView) => void
   move: (direction: -1 | 1) => void
@@ -101,4 +125,11 @@ export interface PositionedCalendarEvent {
   height: number
   left: number
   width: number
+}
+
+export interface AllDayPositionedEvent {
+  event: CalendarEvent
+  colStart: number
+  colSpan: number
+  lane: number
 }

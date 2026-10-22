@@ -24,7 +24,7 @@ function createId(): string {
 
 function save() {
   titleError.value = title.value.trim() ? '' : 'Title is required.'
-  calendarError.value = calendarId.value ? '' : 'Select a calendar.'
+  calendarError.value = !props.calendars.length || calendarId.value ? '' : 'Select a calendar.'
   dateError.value = ''
 
   const startDate = dateFromLocalDateTime(start.value)
@@ -43,7 +43,7 @@ function save() {
 
   const event: CalendarEvent = {
     id: props.event?.id ?? createId(),
-    calendarId: calendarId.value,
+    ...(calendarId.value ? { calendarId: calendarId.value } : {}),
     title: title.value.trim(),
     start: localDateTime(startDate),
     end: localDateTime(endDate),
@@ -72,7 +72,7 @@ function requestDelete() {
           <UInput v-model="title" autofocus maxlength="100" class="w-full" placeholder="Event title" />
         </UFormField>
 
-        <UFormField label="Calendar" required :error="calendarError || undefined">
+        <UFormField v-if="calendars.length" label="Calendar" required :error="calendarError || undefined">
           <USelect v-model="calendarId" :items="calendarOptions" class="w-full" />
         </UFormField>
 

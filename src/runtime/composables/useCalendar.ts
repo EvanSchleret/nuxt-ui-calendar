@@ -66,9 +66,9 @@ export function useCalendar(): CalendarController {
 export function createCalendarController(props: CalendarAppProps, emit: CalendarAppEmits): CalendarController {
   const toast = useToast()
   const overlay = useOverlay()
-  const eventModal = overlay.create(props.eventModal ?? EventModal, { destroyOnClose: true })
-  const searchModal = overlay.create(SearchModal, { destroyOnClose: true })
-  const confirmModal = overlay.create(ConfirmDialog, { destroyOnClose: true })
+  const eventModal = overlay.create(props.eventModal ?? EventModal)
+  const searchModal = overlay.create(SearchModal)
+  const confirmModal = overlay.create(ConfirmDialog)
 
   const date = ref(parseInitialDate(props.date ?? props.initialDate))
   const view = ref<CalendarView>(props.view ?? props.initialView ?? 'week')
@@ -78,10 +78,11 @@ export function createCalendarController(props: CalendarAppProps, emit: Calendar
   const hiddenCalendarIds = useCookie<string[]>(`${storageKey}:hidden`, { default: () => [] })
   const online = ref(true)
   const error = ref<string | null>(null)
+  const monthLabelsVisible = ref(false)
   const queued = shallowRef<QueuedMutation[]>([])
   const activeMutations = ref(0)
   const pendingCount = computed(() => queued.value.length + activeMutations.value)
-  const visibleEvents = computed(() => events.value.filter(event => !hiddenCalendarIds.value.includes(event.calendarId)))
+  const visibleEvents = computed(() => events.value.filter(event => !event.calendarId || !hiddenCalendarIds.value.includes(event.calendarId)))
   let overlayOpen = false
   let replaying = false
 
@@ -279,7 +280,17 @@ export function createCalendarController(props: CalendarAppProps, emit: Calendar
 
   async function openSearch(): Promise<void> {
     overlayOpen = true
-    const result = await searchModal.open({ events: visibleEvents.value, calendars: calendars.value, locale: props.locale ?? 'en-US' })
+    const result = await searchModal.open({
+      events: visibleEvents.value,
+      calendars: calendars.value,
+      locale: props.locale ?? 'en-US',
+      shortcuts: props.shortcuts ?? false,
+      view: view.value,
+      hiddenCalendarIds: hiddenCalendarIds.value,
+      setView,
+      goToToday,
+      toggleCalendar
+    })
     overlayOpen = false
     if (result) {
       setDate(new Date(result.start))
@@ -333,7 +344,10 @@ export function createCalendarController(props: CalendarAppProps, emit: Calendar
     online,
     pendingCount,
     error,
+    monthLabelsVisible,
     locale: props.locale ?? 'en-US',
+    shortcuts: props.shortcuts ?? false,
+    infiniteScroll: props.infiniteScroll ?? true,
     setDate,
     setView,
     move,
@@ -408,7 +422,9 @@ export function createCalendarController(props: CalendarAppProps, emit: Calendar
     online.value = navigator.onLine
     window.addEventListener('online', syncOnline)
     window.addEventListener('offline', syncOnline)
-    window.addEventListener('keydown', onKeydown)
+    if (props.shortcuts) {
+      window.addEventListener('keydown', onKeydown)
+    }
 
     try {
       const saved = localStorage.getItem(`${storageKey}:queue`)
@@ -429,7 +445,9 @@ export function createCalendarController(props: CalendarAppProps, emit: Calendar
     if (import.meta.client) {
       window.removeEventListener('online', syncOnline)
       window.removeEventListener('offline', syncOnline)
-      window.removeEventListener('keydown', onKeydown)
+      if (props.shortcuts) {
+        window.removeEventListener('keydown', onKeydown)
+      }
     }
   })
 

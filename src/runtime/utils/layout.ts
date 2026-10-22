@@ -1,5 +1,5 @@
-import { differenceInMinutes, startOfDay } from 'date-fns'
-import type { CalendarEvent, PositionedCalendarEvent } from '../types'
+import { addDays, differenceInCalendarDays, differenceInMinutes, startOfDay } from 'date-fns'
+import type { AllDayPositionedEvent, CalendarEvent, PositionedCalendarEvent } from '../types'
 import { HOUR_HEIGHT, MIN_EVENT_MINUTES } from './dates'
 
 export function layoutDay(events: CalendarEvent[], day: Date): PositionedCalendarEvent[] {
@@ -57,4 +57,46 @@ export function layoutDay(events: CalendarEvent[], day: Date): PositionedCalenda
   }
 
   return positioned
+}
+
+export function layoutAllDay(events: CalendarEvent[], days: Date[]): AllDayPositionedEvent[] {
+  const firstDay = days[0]
+  const lastDay = days[days.length - 1]
+  if (!firstDay || !lastDay) {
+    return []
+  }
+
+  const weekEnd = addDays(lastDay, 1)
+  const items = events
+    .filter(event => event.allDay)
+    .map((event) => {
+      const start = startOfDay(new Date(event.start))
+      const end = new Date(event.end)
+      const endIndex = differenceInCalendarDays(end, firstDay) + (end.getHours() || end.getMinutes() || end.getSeconds() || end.getMilliseconds() ? 1 : 0)
+      const colStart = Math.max(0, differenceInCalendarDays(start, firstDay))
+      const colEnd = Math.min(days.length, Math.max(colStart + 1, endIndex))
+
+      return { event, start, end, colStart, colEnd }
+    })
+    .filter(item => item.start < weekEnd && item.end > firstDay)
+    .sort((left, right) => left.colStart - right.colStart || right.colEnd - right.colStart - (left.colEnd - left.colStart) || left.event.id.localeCompare(right.event.id))
+
+  const lanes: Array<Array<{ start: number, end: number }>> = []
+
+  return items.map((item) => {
+    let lane = lanes.findIndex(intervals => intervals.every(interval => interval.end <= item.colStart || interval.start >= item.colEnd))
+    if (lane === -1) {
+      lane = lanes.length
+      lanes.push([])
+    }
+
+    lanes[lane]!.push({ start: item.colStart, end: item.colEnd })
+
+    return {
+      event: item.event,
+      colStart: item.colStart,
+      colSpan: item.colEnd - item.colStart,
+      lane
+    }
+  })
 }

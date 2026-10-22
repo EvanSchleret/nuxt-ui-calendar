@@ -1,69 +1,97 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import type { CalendarDefinition, CalendarEvent } from '../types'
+import type { CommandPaletteGroup, CommandPaletteItem } from '@nuxt/ui'
+import type { CalendarDefinition, CalendarEvent, CalendarView } from '../types'
 
 const props = defineProps<{
   events: CalendarEvent[]
   calendars: CalendarDefinition[]
   locale: string
+  shortcuts: boolean
+  view: CalendarView
+  hiddenCalendarIds: string[]
+  setView: (view: CalendarView) => void
+  goToToday: () => void
+  toggleCalendar: (id: string) => void
 }>()
 
 const emit = defineEmits<{ close: [event: CalendarEvent | null] }>()
-const query = ref('')
+const open = ref(true)
+const hiddenCalendarIds = ref([...props.hiddenCalendarIds])
+const selectedEvent = ref<CalendarEvent | null>(null)
 
-const results = computed(() => {
-  const value = query.value.trim().toLocaleLowerCase(props.locale)
-  if (!value) {
-    return []
-  }
+const views: { label: string, value: CalendarView, icon: string, key: string }[] = [
+  { label: 'Day', value: 'day', icon: 'i-lucide-calendar-range', key: 'd' },
+  { label: 'Week', value: 'week', icon: 'i-lucide-calendar-days', key: 'w' },
+  { label: 'Month', value: 'month', icon: 'i-lucide-calendar', key: 'm' }
+]
 
-  return props.events
-    .filter(event => `${event.title} ${event.description ?? ''}`.toLocaleLowerCase(props.locale).includes(value))
-    .slice(0, 30)
-})
+const groups = computed<CommandPaletteGroup<CommandPaletteItem>[]>(() => [{
+  id: 'actions',
+  items: [{
+    label: 'Go to today',
+    icon: 'i-lucide-calendar-check',
+    kbds: props.shortcuts ? [{ value: 't', variant: 'soft' }] : undefined,
+    onSelect: () => props.goToToday()
+  }]
+}, {
+  id: 'views',
+  label: 'Views',
+  items: views.map(item => ({
+    label: item.label,
+    icon: item.icon,
+    kbds: props.shortcuts ? [{ value: item.key, variant: 'soft' }] : undefined,
+    active: props.view === item.value,
+    onSelect: () => props.setView(item.value)
+  }))
+}, {
+  id: 'calendars',
+  label: 'Calendars',
+  slot: 'calendar',
+  items: props.calendars.map(item => ({
+    label: item.name,
+    chip: { color: item.color },
+    checked: !hiddenCalendarIds.value.includes(item.id),
+    onSelect: (event: Event) => {
+      event.preventDefault()
+      props.toggleCalendar(item.id)
+      hiddenCalendarIds.value = hiddenCalendarIds.value.includes(item.id)
+        ? hiddenCalendarIds.value.filter(calendarId => calendarId !== item.id)
+        : [...hiddenCalendarIds.value, item.id]
+    }
+  }))
+}, {
+  id: 'events',
+  label: 'Events',
+  items: props.events.map(event => ({
+    label: event.title,
+    suffix: new Intl.DateTimeFormat(props.locale, { dateStyle: 'medium', timeStyle: event.allDay ? undefined : 'short' }).format(new Date(event.start)),
+    chip: { color: props.calendars.find(item => item.id === event.calendarId)?.color },
+    onSelect: () => {
+      selectedEvent.value = event
+    }
+  }))
+}])
 
-function calendarName(id: string): string {
-  return props.calendars.find(calendar => calendar.id === id)?.name ?? 'Calendar'
-}
-
-function dateLabel(event: CalendarEvent): string {
-  return new Intl.DateTimeFormat(props.locale, { dateStyle: 'medium', timeStyle: event.allDay ? undefined : 'short' }).format(new Date(event.start))
+function close() {
+  emit('close', selectedEvent.value)
 }
 </script>
 
 <template>
-  <UModal title="Search events" description="Find an event by title or description." :ui="{ content: 'sm:max-w-xl' }" @update:open="open => !open && emit('close', null)">
-    <template #body>
-      <div class="flex flex-col gap-3">
-        <UInput v-model="query" icon="i-lucide-search" autofocus placeholder="Search your events" class="w-full" />
-        <div v-if="query.trim()" class="max-h-[min(60vh,32rem)] overflow-y-auto">
-          <UButton
-            v-for="event in results"
-            :key="event.id"
-            color="neutral"
-            variant="ghost"
-            class="w-full justify-start"
-            @click="emit('close', event)"
-          >
-            <template #leading>
-              <span class="mt-1 size-2.5 shrink-0 rounded-full bg-primary" />
-            </template>
-            <span class="flex min-w-0 flex-col items-start">
-              <span class="truncate font-medium">{{ event.title }}</span>
-              <span class="truncate text-xs text-muted">{{ calendarName(event.calendarId) }} · {{ dateLabel(event) }}</span>
-            </span>
-          </UButton>
-          <p v-if="!results.length" class="px-3 py-8 text-center text-sm text-muted">No matching events.</p>
-        </div>
-        <p v-else class="px-3 py-8 text-center text-sm text-muted">Start typing to search events.</p>
-      </div>
-    </template>
-
-    <template #footer>
-      <div class="flex w-full items-center justify-between text-xs text-muted">
-        <span>Search event titles and descriptions</span>
-        <UButton label="Close" color="neutral" variant="outline" @click="emit('close', null)" />
-      </div>
+  <UModal v-model:open="open" title="Search calendar" :ui="{ content: 'sm:max-w-2xl' }" @update:open="value => !value && close()">
+    <template #content>
+      <UCommandPalette
+        :groups="groups"
+        placeholder="Search events, switch views..."
+        close
+        class="h-full sm:h-96"
+        @update:model-value="open = false"
+      >
+        <template #calendar-trailing="{ item, ui }">
+          <UIcon v-if="item.checked" name="i-lucide-check" :class="ui.itemTrailingIcon()" />
+        </template>
+      </UCommandPalette>
     </template>
   </UModal>
 </template>

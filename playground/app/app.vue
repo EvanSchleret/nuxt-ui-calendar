@@ -6,7 +6,7 @@ const today = new Date()
 const datePart = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`
 
 const calendars: CalendarDefinition[] = [
-  { id: 'personal', name: 'Personal', color: 'primary' },
+  { id: 'personal', name: 'Personal', color: 'success' },
   { id: 'work', name: 'Work', color: 'info' },
   { id: 'health', name: 'Health', color: 'success' }
 ]
