@@ -1,8 +1,5 @@
-const ring = 'ring ring-black/8 dark:ring-white/10'
-const content = `glass-material bg-(--glass-bg) ${ring} shadow-2xl`
 const border = 'border-black/8 dark:border-white/10'
 const divide = 'divide-black/8 dark:divide-white/8'
-const overlay = 'backdrop-blur-(--overlay-blur) bg-(--glass-bg)'
 
 export const uiDefaults = {
   colors: {
@@ -19,16 +16,6 @@ export const uiDefaults = {
           viewport: divide
         }
       }
-    }
-  },
-  contextMenu: {
-    slots: {
-      content
-    }
-  },
-  dropdownMenu: {
-    slots: {
-      content
     }
   },
   inputDate: {
@@ -57,36 +44,6 @@ export const uiDefaults = {
       }
     }]
   },
-  modal: {
-    slots: {
-      content: [content, divide]
-    },
-    variants: {
-      fullscreen: {
-        false: {
-          content: [ring, 'shadow-2xl w-[calc(100vw-1rem)] h-[calc(100dvh-1rem)] sm:w-[calc(100vw-2rem)] sm:h-auto']
-        }
-      },
-      overlay: {
-        true: {
-          overlay
-        }
-      }
-    },
-    compoundVariants: [{
-      fullscreen: false,
-      scrollable: false,
-      class: {
-        content: 'max-h-none'
-      }
-    }, {
-      fullscreen: false,
-      scrollable: true,
-      class: {
-        overlay: 'p-2 sm:p-4 sm:py-8'
-      }
-    }]
-  },
   navigationMenu: {
     slots: {
       link: 'hover:before:bg-(--control-bg-hover)'
@@ -100,14 +57,8 @@ export const uiDefaults = {
       }
     }]
   },
-  popover: {
-    slots: {
-      content
-    }
-  },
   select: {
     slots: {
-      content,
       item: 'data-highlighted:not-data-disabled:before:bg-(--control-bg)'
     },
     variants: {
@@ -120,20 +71,9 @@ export const uiDefaults = {
     slots: {
       body: 'p-2 gap-2',
       footer: ['p-2 border-t', border]
-    },
-    variants: {
-      variant: {
-        floating: {
-          inner: [content, 'divide-none']
-        }
-      }
     }
   },
   slideover: {
-    slots: {
-      overlay,
-      content: [content, 'divide-none sm:shadow-2xl']
-    },
     compoundVariants: [{
       side: 'top',
       inset: true,

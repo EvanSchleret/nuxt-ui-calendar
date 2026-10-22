@@ -18,45 +18,18 @@
 }
 
 :root {
-  --overlay-blur: 8px;
-}
-
-:root {
-  --glass-bg: rgb(255 255 255 / 0.42);
-  --glass-blur: 24px;
-  --glass-saturate: 180%;
-  --glass-brightness: 105%;
-  --glass-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
   --control-bg: rgb(0 0 0 / 0.05);
   --control-bg-hover: rgb(0 0 0 / 0.09);
   --well-bg: rgb(0 0 0 / 0.05);
 }
 
 .dark {
-  --glass-bg: rgb(28 28 30 / 0.55);
-  --glass-blur: 28px;
-  --glass-saturate: 150%;
-  --glass-brightness: 110%;
   --control-bg: rgb(255 255 255 / 0.06);
   --control-bg-hover: rgb(255 255 255 / 0.10);
   --well-bg: rgb(0 0 0 / 0.22);
 }
 
-@media (prefers-reduced-transparency: reduce) {
-  :root,
-  .dark {
-    --glass-bg: var(--ui-bg);
-    --glass-blur: 0px;
-    --overlay-blur: 0px;
-  }
-}
-
 @layer components {
-  .ui-calendar .glass-material {
-    -webkit-backdrop-filter: var(--glass-filter);
-    backdrop-filter: var(--glass-filter);
-  }
-
   .ui-calendar {
     --ui-primary: #FF383C;
     --ui-color-primary-50: #FEF2F2;
