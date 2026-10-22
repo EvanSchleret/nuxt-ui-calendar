@@ -43,6 +43,9 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Prepare Nuxt ESLint config
+        run: bun run dev:prepare
+
       - name: Apply ESLint fixes
         run: bun run lint --fix
 
