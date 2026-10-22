@@ -1,6 +1,6 @@
 import { computed, inject, onMounted, onUnmounted, provide, ref, shallowRef, watch, type InjectionKey, type Ref } from 'vue'
 import { useCookie, useOverlay, useToast } from '#imports'
-import type { CalendarAppEmits, CalendarAppProps, CalendarController, CalendarDefinition, CalendarEvent, CalendarMutation, CalendarView } from '../types'
+import type { CalendarAppEmits, CalendarAppProps, CalendarController, CalendarDefinition, CalendarEvent, CalendarEventModalResult, CalendarMutation, CalendarView } from '../types'
 import { eventCoversDay, stepDate } from '../utils/dates'
 import EventModal from '../components/EventModal.vue'
 import SearchModal from '../components/SearchModal.vue'
@@ -66,7 +66,7 @@ export function useCalendar(): CalendarController {
 export function createCalendarController(props: CalendarAppProps, emit: CalendarAppEmits): CalendarController {
   const toast = useToast()
   const overlay = useOverlay()
-  const eventModal = overlay.create(EventModal, { destroyOnClose: true })
+  const eventModal = overlay.create(props.eventModal ?? EventModal, { destroyOnClose: true })
   const searchModal = overlay.create(SearchModal, { destroyOnClose: true })
   const confirmModal = overlay.create(ConfirmDialog, { destroyOnClose: true })
 
@@ -240,7 +240,7 @@ export function createCalendarController(props: CalendarAppProps, emit: Calendar
       initialStart: start,
       allDay,
       locale: props.locale ?? 'en-US'
-    })
+    }) as CalendarEventModalResult | undefined
     overlayOpen = false
 
     if (!result) {

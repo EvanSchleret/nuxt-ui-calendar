@@ -1,4 +1,4 @@
-import type { Ref } from 'vue'
+import type { Component, Ref } from 'vue'
 
 export type CalendarView = 'day' | 'week' | 'month'
 export type CalendarColor = 'primary' | 'secondary' | 'info' | 'success' | 'warning' | 'error'
@@ -29,6 +29,21 @@ export type CalendarMutation =
   | { type: 'update'; event: CalendarEvent }
   | { type: 'delete'; id: string }
 
+export interface CalendarEventModalProps {
+  event: CalendarEvent | null
+  calendars: CalendarDefinition[]
+  initialStart: Date
+  allDay: boolean
+  locale: string
+}
+
+export type CalendarEventModalResult =
+  | { action: 'save'; event: CalendarEvent }
+  | { action: 'delete' }
+  | null
+
+export type CalendarEventModalComponent = Component<CalendarEventModalProps>
+
 export interface CalendarMutationAdapter {
   create: (event: CalendarEvent) => Promise<void>
   update: (event: CalendarEvent) => Promise<void>
@@ -39,6 +54,7 @@ export interface CalendarAppProps {
   events?: CalendarEvent[]
   calendars?: CalendarDefinition[]
   adapter?: CalendarMutationAdapter
+  eventModal?: CalendarEventModalComponent
   date?: Date | string
   view?: CalendarView
   initialDate?: Date | string

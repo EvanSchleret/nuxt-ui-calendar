@@ -78,6 +78,37 @@ const adapter = {
 
 When no `adapter` is provided, changes update `v-model:events` immediately and emit `create`, `update` and `delete` events for the host to persist. With an adapter, mutations are optimistic, queued in local storage while offline, and replayed when the browser reconnects.
 
+## Custom event modal
+
+Pass your own Vue component through `eventModal` to replace the built-in create and edit modal. The component receives `event`, `calendars`, `initialStart`, `allDay` and `locale`, and must emit the typed `close` result. This same component opens from double-clicks, the create buttons and the `N` shortcut.
+
+```vue
+<script setup lang="ts">
+import CustomEventModal from '~/components/CustomEventModal.vue'
+</script>
+
+<template>
+  <CalendarApp
+    v-model:events="events"
+    :calendars="calendars"
+    :event-modal="CustomEventModal"
+  />
+</template>
+```
+
+Type the custom component against the public modal contract:
+
+```vue
+<script setup lang="ts">
+import type { CalendarEventModalProps, CalendarEventModalResult } from '@evanschleret/nuxt-ui-calendar/runtime/types'
+
+defineProps<CalendarEventModalProps>()
+const emit = defineEmits<{ close: [result: CalendarEventModalResult] }>()
+</script>
+```
+
+Emit `null` to cancel, `{ action: 'save', event }` to create or update an event, or `{ action: 'delete' }` to request deletion of the current event. Deletion still uses the calendar's confirmation dialog and persistence flow.
+
 Events use floating local datetime strings in `YYYY-MM-DDTHH:mm:ss` form. Their displayed wall-clock time is the same in each viewer's timezone. For all-day events, `end` is exclusive and should be the following midnight.
 
 ## Components and composables

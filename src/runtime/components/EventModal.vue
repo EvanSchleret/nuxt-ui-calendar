@@ -1,20 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import type { CalendarDefinition, CalendarEvent } from '../types'
+import type { CalendarEvent, CalendarEventModalProps, CalendarEventModalResult } from '../types'
 import { addDays, addMinutes, dateFromLocalDateTime, dateInputValue, localDateTime } from '../utils/dates'
-
-interface CalendarEventModalProps {
-  event: CalendarEvent | null
-  calendars: CalendarDefinition[]
-  initialStart: Date
-  allDay: boolean
-  locale: string
-}
-
-type CalendarEventModalResult =
-  | { action: 'save', event: CalendarEvent }
-  | { action: 'delete' }
-  | null
 
 const props = defineProps<CalendarEventModalProps>()
 const emit = defineEmits<{ close: [result: CalendarEventModalResult] }>()
