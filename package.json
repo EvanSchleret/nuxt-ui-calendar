@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/evanschleret/nuxt-ui-calendar.git"
+    "url": "https://github.com/EvanSchleret/nuxt-ui-calendar"
   },
   "type": "module",
   "module": "./dist/module.mjs",
