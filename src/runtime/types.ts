@@ -1,4 +1,5 @@
 import type { Component, Ref, VNode } from 'vue'
+import type { CalendarMessageKey, CalendarMessageParams } from './utils/i18n'
 
 export type CalendarView = 'day' | 'week' | 'month'
 export type CalendarColor = 'primary' | 'secondary' | 'info' | 'success' | 'warning' | 'error'
@@ -117,6 +118,7 @@ export interface CalendarController {
   error: Ref<string | null>
   monthLabelsVisible: Ref<boolean>
   locale: string
+  t: (key: CalendarMessageKey, params?: CalendarMessageParams) => string
   shortcuts: boolean
   infiniteScroll: boolean
   setDate: (date: Date) => void

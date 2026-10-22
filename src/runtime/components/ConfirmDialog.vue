@@ -1,17 +1,20 @@
 <script setup lang="ts">
-defineProps<{
-  title: string
-  description: string
-}>()
+import { translateCalendar } from '../utils/i18n'
 
 const emit = defineEmits<{ close: [confirmed: boolean] }>()
+const props = defineProps<{
+  title: string
+  description: string
+  locale: string
+}>()
+const t = (key: 'cancel' | 'deleteEvent') => translateCalendar(props.locale, key)
 </script>
 
 <template>
   <UModal :title="title" :description="description" :ui="{ footer: 'justify-end' }" @update:open="open => !open && emit('close', false)">
     <template #footer>
-      <UButton label="Cancel" color="neutral" variant="outline" @click="emit('close', false)" />
-      <UButton label="Delete event" color="error" @click="emit('close', true)" />
+      <UButton :label="t('cancel')" color="neutral" variant="outline" @click="emit('close', false)" />
+      <UButton :label="t('deleteEvent')" color="error" @click="emit('close', true)" />
     </template>
   </UModal>
 </template>

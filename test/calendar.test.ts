@@ -2,6 +2,7 @@ import { describe, expect, it } from 'bun:test'
 import { daysForView, localDateTime, monthViewFocusDate, weekIndexForDate } from '../src/runtime/utils/dates'
 import { hiddenCalendarIdsFor } from '../src/runtime/utils/calendars'
 import { layoutDay } from '../src/runtime/utils/layout'
+import { translateCalendar } from '../src/runtime/utils/i18n'
 import type { CalendarDefinition, CalendarEvent } from '../src/runtime/types'
 import { uiDefaults } from '../src/ui-config'
 
@@ -60,6 +61,25 @@ describe('calendar visibility', () => {
 
   it('supports hiding every calendar', () => {
     expect(hiddenCalendarIdsFor(calendars, [])).toEqual(['work', 'personal'])
+  })
+})
+
+describe('calendar translations', () => {
+  it('uses the base language from a regional locale', () => {
+    expect(translateCalendar('fr-CH', 'day')).toBe('Jour')
+    expect(translateCalendar('fr-CH', 'allDay')).toBe('toute la journée')
+    expect(translateCalendar('fr-CH', 'allDayCheckbox')).toBe('Toute la journée')
+    expect(translateCalendar('fr-CH', 'week')).toBe('Semaine')
+    expect(translateCalendar('fr-CH', 'month')).toBe('Mois')
+    expect(translateCalendar('fr-CH', 'today')).toBe('Aujourd’hui')
+  })
+
+  it('interpolates localized accessible labels', () => {
+    expect(translateCalendar('fr-CH', 'openDate', { date: 'jeudi 22 octobre 2026' })).toBe('Ouvrir le jeudi 22 octobre 2026')
+  })
+
+  it('falls back to English when a language has no calendar translations', () => {
+    expect(translateCalendar('ja-JP', 'today')).toBe('Today')
   })
 })
 

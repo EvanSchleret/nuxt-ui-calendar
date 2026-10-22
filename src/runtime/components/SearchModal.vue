@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import type { CommandPaletteGroup, CommandPaletteItem } from '@nuxt/ui'
 import type { CalendarDefinition, CalendarEvent, CalendarView } from '../types'
+import { translateCalendar } from '../utils/i18n'
 
 const props = defineProps<{
   events: CalendarEvent[]
@@ -19,25 +20,26 @@ const emit = defineEmits<{ close: [event: CalendarEvent | null] }>()
 const open = ref(true)
 const hiddenCalendarIds = ref([...props.hiddenCalendarIds])
 const selectedEvent = ref<CalendarEvent | null>(null)
+const t = (key: Parameters<typeof translateCalendar>[1]) => translateCalendar(props.locale, key)
 
-const views: { label: string, value: CalendarView, icon: string, key: string }[] = [
-  { label: 'Day', value: 'day', icon: 'i-lucide-calendar-range', key: 'd' },
-  { label: 'Week', value: 'week', icon: 'i-lucide-calendar-days', key: 'w' },
-  { label: 'Month', value: 'month', icon: 'i-lucide-calendar', key: 'm' }
-]
+const views = computed<{ label: string, value: CalendarView, icon: string, key: string }[]>(() => [
+  { label: t('day'), value: 'day', icon: 'i-lucide-calendar-range', key: 'd' },
+  { label: t('week'), value: 'week', icon: 'i-lucide-calendar-days', key: 'w' },
+  { label: t('month'), value: 'month', icon: 'i-lucide-calendar', key: 'm' }
+])
 
 const groups = computed<CommandPaletteGroup<CommandPaletteItem>[]>(() => [{
   id: 'actions',
   items: [{
-    label: 'Go to today',
+    label: t('goToToday'),
     icon: 'i-lucide-calendar-check',
     kbds: props.shortcuts ? [{ value: 't', variant: 'soft' }] : undefined,
     onSelect: () => props.goToToday()
   }]
 }, {
   id: 'views',
-  label: 'Views',
-  items: views.map(item => ({
+  label: t('views'),
+  items: views.value.map(item => ({
     label: item.label,
     icon: item.icon,
     kbds: props.shortcuts ? [{ value: item.key, variant: 'soft' }] : undefined,
@@ -46,7 +48,7 @@ const groups = computed<CommandPaletteGroup<CommandPaletteItem>[]>(() => [{
   }))
 }, {
   id: 'calendars',
-  label: 'Calendars',
+  label: t('calendars'),
   slot: 'calendar',
   items: props.calendars.map(item => ({
     label: item.name,
@@ -62,7 +64,7 @@ const groups = computed<CommandPaletteGroup<CommandPaletteItem>[]>(() => [{
   }))
 }, {
   id: 'events',
-  label: 'Events',
+  label: t('events'),
   items: props.events.map(event => ({
     label: event.title,
     suffix: new Intl.DateTimeFormat(props.locale, { dateStyle: 'medium', timeStyle: event.allDay ? undefined : 'short' }).format(new Date(event.start)),
@@ -79,11 +81,11 @@ function close() {
 </script>
 
 <template>
-  <UModal v-model:open="open" title="Search calendar" :ui="{ content: 'sm:max-w-2xl' }" @update:open="value => !value && close()">
+  <UModal v-model:open="open" :title="t('searchCalendar')" :ui="{ content: 'sm:max-w-2xl' }" @update:open="value => !value && close()">
     <template #content>
       <UCommandPalette
         :groups="groups"
-        placeholder="Search events, switch views..."
+        :placeholder="t('searchEventsSwitchViews')"
         close
         class="h-full sm:h-96"
         @update:model-value="open = false"

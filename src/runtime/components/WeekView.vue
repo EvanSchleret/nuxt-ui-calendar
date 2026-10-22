@@ -154,7 +154,7 @@ function createAllDay(day: Date) {
         class="grid border-t border-default"
         :style="{ ...gridStyle, gridTemplateRows: `repeat(${allDayLanes}, ${ALL_DAY_LANE_HEIGHT}px)` }"
       >
-        <span class="row-span-full self-center pe-2 text-end text-[10px] text-dimmed">all-day</span>
+        <span class="row-span-full self-center pe-2 text-end text-[10px] text-dimmed">{{ calendar.t('allDay') }}</span>
 
         <div
           v-for="(day, index) in days"
@@ -174,6 +174,6 @@ function createAllDay(day: Date) {
         />
       </div>
     </div>
-    <p class="sr-only">{{ heading }}. Double-click an empty time slot to create an event. Drag events to move them.</p>
+    <p class="sr-only">{{ heading }}. {{ calendar.t('doubleClickEmptySlot') }} {{ calendar.t('dragEventsToMove') }}</p>
   </div>
 </template>

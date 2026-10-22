@@ -9,15 +9,15 @@ const props = withDefaults(defineProps<{ title: CalendarTitle, viewSwitcherPlace
 })
 defineSlots<Pick<CalendarAppSlots, 'view-switcher' | 'previous' | 'today' | 'next'>>()
 const calendar = useCalendar()
-const viewOptions = [
-  { label: 'Day', value: 'day' },
-  { label: 'Week', value: 'week' },
-  { label: 'Month', value: 'month' }
-] satisfies { label: string, value: CalendarView }[]
+const viewOptions = computed(() => [
+  { label: calendar.t('day'), value: 'day' },
+  { label: calendar.t('week'), value: 'week' },
+  { label: calendar.t('month'), value: 'month' }
+] satisfies { label: string, value: CalendarView }[])
 const slotProps = computed<CalendarToolbarSlotProps>(() => ({
   date: calendar.date.value,
   view: calendar.view.value,
-  views: viewOptions.map(option => option.value),
+  views: viewOptions.value.map(option => option.value),
   setView: calendar.setView,
   goToPrevious: () => calendar.move(-1),
   goToToday: calendar.goToToday,
@@ -76,8 +76,8 @@ function changeView(value: string | number) {
         icon="i-lucide-loader-circle"
         color="neutral"
         variant="subtle"
-        :label="calendar.pendingCount.value > 1 ? String(calendar.pendingCount.value) : 'Saving'"
-        aria-label="Saving calendar changes"
+        :label="calendar.pendingCount.value > 1 ? String(calendar.pendingCount.value) : calendar.t('saving')"
+        :aria-label="calendar.t('savingCalendarChanges')"
       />
       <UBadge
         v-if="!calendar.online.value"
@@ -85,25 +85,25 @@ function changeView(value: string | number) {
         color="warning"
         variant="subtle"
         :label="calendar.pendingCount.value ? String(calendar.pendingCount.value) : undefined"
-        aria-label="Offline. Changes will sync when reconnected."
+        :aria-label="calendar.t('offlineSyncDescription')"
       />
-      <UButton icon="i-lucide-search" color="neutral" variant="ghost" aria-label="Search events" @click="calendar.openSearch()" />
+      <UButton icon="i-lucide-search" color="neutral" variant="ghost" :aria-label="calendar.t('searchEvents')" @click="calendar.openSearch()" />
       <slot name="previous" v-bind="slotProps">
-        <UTooltip text="Previous">
-          <UButton icon="i-lucide-chevron-left" color="neutral" variant="soft" size="sm" aria-label="Previous range" @click="calendar.move(-1)" />
+        <UTooltip :text="calendar.t('previous')">
+          <UButton icon="i-lucide-chevron-left" color="neutral" variant="soft" size="sm" :aria-label="calendar.t('previousRange')" @click="calendar.move(-1)" />
         </UTooltip>
       </slot>
       <slot name="today" v-bind="slotProps">
-        <UTooltip text="Today">
-          <UButton color="neutral" variant="soft" size="sm" class="hidden sm:inline-flex" @click="calendar.goToToday()">Today</UButton>
+        <UTooltip :text="calendar.t('today')">
+          <UButton color="neutral" variant="soft" size="sm" class="hidden sm:inline-flex" @click="calendar.goToToday()">{{ calendar.t('today') }}</UButton>
         </UTooltip>
       </slot>
       <slot name="next" v-bind="slotProps">
-        <UTooltip text="Next">
-          <UButton icon="i-lucide-chevron-right" color="neutral" variant="soft" size="sm" aria-label="Next range" @click="calendar.move(1)" />
+        <UTooltip :text="calendar.t('next')">
+          <UButton icon="i-lucide-chevron-right" color="neutral" variant="soft" size="sm" :aria-label="calendar.t('nextRange')" @click="calendar.move(1)" />
         </UTooltip>
       </slot>
-      <UButton icon="i-lucide-plus" color="primary" size="sm" aria-label="Create event" @click="calendar.openEvent(undefined, calendar.date.value)" />
+      <UButton icon="i-lucide-plus" color="primary" size="sm" :aria-label="calendar.t('createEvent')" @click="calendar.openEvent(undefined, calendar.date.value)" />
     </div>
   </header>
 </template>

@@ -111,7 +111,7 @@ function startResize(event: PointerEvent) {
     :class="[eventBlockClasses[calendarColor], eventOutlineClasses[calendarColor], 'z-10']"
     :style="eventStyle"
     :draggable="true"
-    :aria-label="`${event.title}, ${timeRange}`"
+    :aria-label="event.allDay ? calendar.t('allDayEvent', { title: event.title }) : `${event.title}, ${timeRange}`"
     @click.stop="calendar.openEvent(event)"
     @dragstart="onDragStart"
     @dblclick.stop
@@ -124,7 +124,7 @@ function startResize(event: PointerEvent) {
       data-resize-handle
       role="separator"
       aria-orientation="horizontal"
-      :aria-label="`Resize ${event.title}`"
+      :aria-label="calendar.t('resizeEvent', { title: event.title })"
       tabindex="0"
       class="absolute inset-x-0 bottom-0 h-2 cursor-ns-resize"
       @pointerdown="startResize"

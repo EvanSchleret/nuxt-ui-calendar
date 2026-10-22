@@ -92,7 +92,7 @@ function createAllDay(day: Date) {
         ? 'text-inverted bg-primary active:bg-primary/75 outline-primary/25'
         : 'text-default hover:bg-(--control-bg) active:bg-(--control-bg) outline-inverted/25'"
       :style="{ gridColumn: index + 1 }"
-      :aria-label="`Open ${day.toLocaleDateString(calendar.locale, { dateStyle: 'full' })}`"
+      :aria-label="calendar.t('openDate', { date: day.toLocaleDateString(calendar.locale, { dateStyle: 'full' }) })"
       @click="openDay(day)"
     >
       {{ label(day) }}
@@ -131,7 +131,8 @@ function createAllDay(day: Date) {
             :style="{ gridColumn: index + 1, gridRow: more.slot + 2 }"
           >
             <span class="lg:hidden">+{{ more.hidden }}</span>
-            <span class="hidden lg:inline">+{{ more.hidden }} more</span>
+            <span class="hidden lg:inline">+{{ more.hidden }} {{ calendar.t('more') }}</span>
+            <span class="sr-only">{{ calendar.t('showMoreEvents', { count: more.hidden }) }}</span>
           </UButton>
         </template>
 

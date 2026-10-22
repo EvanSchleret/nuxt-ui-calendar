@@ -45,7 +45,7 @@ export default defineAppConfig({
 
 Use `v-model:date` and `v-model:view` when the host router should control the selected range. The `initialDate` and `initialView` props set an uncontrolled starting point.
 
-Calendar dates and labels inherit the locale configured on the host app's `<UApp :locale="...">`. Set the `locale` prop on `CalendarApp` to override it for this calendar.
+Calendar dates and labels inherit the locale configured on the host app's `<UApp :locale="...">`. Set the `locale` prop on `CalendarApp` to override it for this calendar. Built-in calendar text is translated for English, French, German, Italian, Spanish, Dutch, and Portuguese; regional locales use their base language (for example, `fr-CH` uses French). Other languages fall back to English for built-in text while date formatting continues to use the supplied locale.
 
 ## Customize the toolbar
 

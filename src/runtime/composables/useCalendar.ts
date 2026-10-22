@@ -6,6 +6,7 @@ import EventModal from '../components/EventModal.vue'
 import SearchModal from '../components/SearchModal.vue'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
 import { hiddenCalendarIdsFor } from '../utils/calendars'
+import { translateCalendar } from '../utils/i18n'
 
 interface QueuedMutation {
   mutation: CalendarMutation
@@ -215,7 +216,7 @@ export function createCalendarController(props: CalendarAppProps, emit: Calendar
       }
 
       rollback(item)
-      error.value = 'The change could not be saved.'
+      error.value = translateCalendar(props.locale ?? appLocale.value, 'changeCouldNotBeSaved')
       toast.add({ title: error.value, color: 'error' })
     } finally {
       activeMutations.value -= 1
@@ -269,14 +270,15 @@ export function createCalendarController(props: CalendarAppProps, emit: Calendar
 
     if (result.action === 'delete' && event) {
       const confirmed = await confirmModal.open({
-        title: 'Delete event?',
-        description: `“${event.title}” will be deleted.`
+        title: translateCalendar(props.locale ?? appLocale.value, 'deleteEvent'),
+        description: translateCalendar(props.locale ?? appLocale.value, 'deleteEventConfirmation', { title: event.title }),
+        locale: props.locale ?? appLocale.value
       })
 
       if (confirmed) {
         await removeEvent(event.id)
         if (!error.value) {
-          toast.add({ title: 'Event deleted', color: 'success' })
+          toast.add({ title: translateCalendar(props.locale ?? appLocale.value, 'eventDeleted'), color: 'success' })
         }
       }
       return
@@ -286,12 +288,12 @@ export function createCalendarController(props: CalendarAppProps, emit: Calendar
       if (event) {
         await updateEvent(result.event)
         if (!error.value) {
-          toast.add({ title: 'Event updated', color: 'success' })
+          toast.add({ title: translateCalendar(props.locale ?? appLocale.value, 'eventUpdated'), color: 'success' })
         }
       } else {
         await createEvent(result.event)
         if (!error.value) {
-          toast.add({ title: 'Event created', color: 'success' })
+          toast.add({ title: translateCalendar(props.locale ?? appLocale.value, 'eventCreated'), color: 'success' })
         }
       }
     }
@@ -343,12 +345,12 @@ export function createCalendarController(props: CalendarAppProps, emit: Calendar
 
         rollback(item)
         queued.value = queued.value.slice(1)
-        toast.add({ title: 'An offline change could not be synced', color: 'error' })
+        toast.add({ title: translateCalendar(props.locale ?? appLocale.value, 'offlineChangeCouldNotBeSynced'), color: 'error' })
       }
     }
 
     if (synced) {
-      toast.add({ title: 'Offline changes synced', color: 'success' })
+      toast.add({ title: translateCalendar(props.locale ?? appLocale.value, 'offlineChangesSynced'), color: 'success' })
     }
     replaying = false
   }
@@ -367,6 +369,9 @@ export function createCalendarController(props: CalendarAppProps, emit: Calendar
     monthLabelsVisible,
     get locale() {
       return props.locale ?? appLocale.value
+    },
+    t(key, params) {
+      return translateCalendar(props.locale ?? appLocale.value, key, params)
     },
     shortcuts: props.shortcuts ?? false,
     infiniteScroll: props.infiniteScroll ?? true,
@@ -428,7 +433,7 @@ export function createCalendarController(props: CalendarAppProps, emit: Calendar
       try {
         localStorage.setItem(`${storageKey}:queue`, JSON.stringify(items))
       } catch {
-        error.value = 'Offline changes could not be stored in this browser.'
+        error.value = translateCalendar(props.locale ?? appLocale.value, 'offlineChangesCouldNotBeStored')
       }
     }, { deep: true })
 

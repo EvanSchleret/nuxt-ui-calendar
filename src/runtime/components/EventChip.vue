@@ -66,7 +66,7 @@ const time = computed(() => new Intl.DateTimeFormat(calendar.locale, { hour: 'nu
         ? eventBlockClasses[calendarColor]
         : ['text-default hover:bg-(--control-bg) data-active:bg-(--control-bg)', eventChipCompactClasses[calendarColor]]
     ]"
-    :aria-label="event.allDay ? event.title : `${event.title}, ${time}`"
+    :aria-label="event.allDay ? calendar.t('allDayEvent', { title: event.title }) : `${event.title}, ${time}`"
     @click.stop="calendar.openEvent(event)"
     @dblclick.stop
   >
