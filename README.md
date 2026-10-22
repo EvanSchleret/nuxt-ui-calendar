@@ -97,3 +97,23 @@ Keyboard shortcuts are `T` for today, `D`, `W` and `M` for views, `N` for a new 
 ## Development
 
 The `playground/` directory exercises the module against a small sample calendar. Use Bun for package management and `bun test` for the utility tests.
+
+## Project status
+
+This package is in early development. Public APIs may change before a stable release.
+
+## Documentation
+
+This README contains the installation guide, a minimal usage example, and the component and composable overview. The `playground/` directory contains a runnable example.
+
+## Contributing
+
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. Use [GitHub Issues](https://github.com/evanschleret/nuxt-ui-calendar/issues) to report bugs or discuss feature requests.
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for the supported versions and private vulnerability reporting instructions.
+
+## License
+
+This package is distributed under the MIT License. See [LICENSE](LICENSE) for the license text and retained upstream copyright notice.
