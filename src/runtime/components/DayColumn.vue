@@ -40,7 +40,7 @@ function dropEvent(event: DragEvent) {
   <div
     data-day-column
     :data-date="localDateTime(day).slice(0, 10)"
-    class="relative snap-start border-s border-default"
+    class="uical:cal:relative uical-snap-start uical-border-start uical:cal:border-default"
     :style="{ height: `${24 * HOUR_HEIGHT}px` }"
     @dblclick="createAt"
     @dragover.prevent
@@ -49,7 +49,7 @@ function dropEvent(event: DragEvent) {
     <div
       v-for="hour in 23"
       :key="hour"
-      class="pointer-events-none absolute inset-x-0 snap-start border-t border-default"
+      class="uical:cal:pointer-events-none uical:cal:absolute uical:cal:inset-x-0 uical-snap-start uical-border-top uical:cal:border-default"
       :style="{ top: `${hour * HOUR_HEIGHT}px` }"
     />
 
@@ -62,10 +62,10 @@ function dropEvent(event: DragEvent) {
 
     <div
       v-if="day.toDateString() === now.toDateString()"
-      class="pointer-events-none absolute inset-x-0 z-20 border-t-2 border-error"
+      class="uical:cal:pointer-events-none uical:cal:absolute uical:cal:inset-x-0 uical:cal:z-20 uical-border-top-2 uical:cal:border-error"
       :style="{ top: `${(now.getHours() * 60 + now.getMinutes()) * HOUR_HEIGHT / 60}px` }"
     >
-      <span class="absolute -top-1 -left-1.5 size-3 rounded-full bg-error" />
+      <span class="uical:cal:absolute uical:cal:-top-1 uical:cal:-left-1.5 uical:cal:size-3 uical:cal:rounded-full uical:cal:bg-error" />
     </div>
 
   </div>

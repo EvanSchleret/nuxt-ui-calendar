@@ -81,13 +81,13 @@ function close() {
 </script>
 
 <template>
-  <UModal v-model:open="open" :title="t('searchCalendar')" :ui="{ content: 'sm:max-w-2xl' }" @update:open="value => !value && close()">
+  <UModal v-model:open="open" :title="t('searchCalendar')" :ui="{ content: 'ui-calendar uical:cal:sm:max-w-2xl' }" @update:open="value => !value && close()">
     <template #content>
       <UCommandPalette
         :groups="groups"
         :placeholder="t('searchEventsSwitchViews')"
         close
-        class="h-full sm:h-96"
+        class="uical:cal:h-full uical:cal:sm:h-96"
         @update:model-value="open = false"
       >
         <template #calendar-trailing="{ item, ui }">

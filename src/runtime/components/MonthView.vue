@@ -226,15 +226,15 @@ watch(calendar.date, (date) => {
 </script>
 
 <template>
-  <div data-calendar-view="month" class="relative flex min-h-0 flex-1 flex-col">
+  <div data-calendar-view="month" class="uical:cal:relative uical:cal:flex uical:cal:min-h-0 uical:cal:flex-1 uical:cal:flex-col">
     <UScrollArea
       v-if="calendar.infiniteScroll"
       ref="scrollArea"
       :items="weeks"
       :virtualize="{ estimateSize: ROW_HEIGHT, skipMeasurement: true, overscan: 4, paddingStart: CHROME_HEIGHT, scrollPaddingStart: CHROME_HEIGHT, initialOffset }"
-      :ui="{ item: 'snap-start' }"
+      :ui="{ item: 'uical-snap-start' }"
       :style="{ scrollPaddingTop: `${CHROME_HEIGHT}px` }"
-      class="flex-1 snap-y snap-proximity scrollbar-gutter-stable"
+      class="uical:cal:flex-1 uical-scroll-y uical:cal:scrollbar-gutter-stable"
       @scroll="onScroll"
     >
       <template #default="{ item }">
@@ -245,7 +245,7 @@ watch(calendar.date, (date) => {
     <div
       v-else
       ref="staticScrollArea"
-      class="flex-1 scrollbar-gutter-stable overflow-y-auto"
+      class="uical:cal:flex-1 uical:cal:scrollbar-gutter-stable uical:cal:overflow-y-auto uical-scroll-y"
       :style="{ paddingTop: `${CHROME_HEIGHT}px`, scrollPaddingTop: `${CHROME_HEIGHT}px` }"
     >
       <CalendarMonthWeek
@@ -256,12 +256,12 @@ watch(calendar.date, (date) => {
       />
     </div>
 
-    <div class="absolute inset-x-0 top-[calc(var(--ui-header-height)+0.5rem)] z-30 grid h-10 scrollbar-gutter-stable grid-cols-7 overflow-hidden border-b border-default bg-default">
+    <div class="uical:cal:absolute uical:cal:inset-x-0 uical:cal:top-[calc(var(--ui-header-height)+0.5rem)] uical:cal:z-30 uical:cal:grid uical:cal:h-10 uical:cal:scrollbar-gutter-stable uical:cal:grid-cols-7 uical:cal:overflow-hidden uical-border-bottom uical:cal:border-default uical:cal:bg-default">
       <span
         v-for="(weekday, index) in weekdays"
         :key="weekday"
-        class="flex items-center justify-end border-default pe-2 text-sm text-muted"
-        :class="index !== 0 && 'border-s'"
+        class="uical:cal:flex uical:cal:items-center uical:cal:justify-end uical:cal:border-default uical:cal:pe-2 uical:cal:text-sm uical:cal:text-muted"
+        :class="index !== 0 && 'uical-border-start'"
       >
         {{ weekday }}
       </span>
@@ -269,18 +269,18 @@ watch(calendar.date, (date) => {
 
     <div
       v-if="calendar.infiniteScroll"
-      class="pointer-events-none absolute inset-x-0 bottom-0 z-40 overflow-hidden transition-opacity"
-      :class="calendar.monthLabelsVisible.value ? 'opacity-100 duration-150' : 'opacity-0 duration-300'"
+      class="uical:cal:pointer-events-none uical:cal:absolute uical:cal:inset-x-0 uical:cal:bottom-0 uical:cal:z-40 uical:cal:overflow-hidden uical-transition-opacity"
+      :class="calendar.monthLabelsVisible.value ? 'uical:cal:opacity-100 uical-duration-150' : 'uical:cal:opacity-0 uical-duration-300'"
       :style="{ top: `${DOCK_TOP}px` }"
     >
       <div
         v-for="label in labels"
         :key="label.key"
-        class="absolute inset-s-13 top-0 flex h-8 items-center gap-1.5 text-xl tracking-tight will-change-[translate] sm:text-2xl lg:inset-s-4"
+        class="uical:cal:absolute uical:cal:inset-s-13 uical:cal:top-0 uical:cal:flex uical:cal:h-8 uical:cal:items-center uical:cal:gap-1.5 uical:cal:text-xl uical-tracking-tight uical:cal:will-change-[translate] uical:cal:sm:text-2xl uical:cal:lg:inset-s-4"
         :style="{ translate: `0 ${label.y}px` }"
       >
-        <span class="truncate font-bold text-highlighted">{{ label.month }}</span>
-        <span class="hidden font-normal text-muted sm:inline">{{ label.year }}</span>
+        <span class="uical:cal:truncate uical-font-bold uical:cal:text-highlighted">{{ label.month }}</span>
+        <span class="uical:cal:hidden uical-font-normal uical:cal:text-muted uical:cal:sm:inline">{{ label.year }}</span>
       </div>
     </div>
   </div>

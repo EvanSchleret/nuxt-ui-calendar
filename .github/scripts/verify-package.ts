@@ -83,6 +83,22 @@ async function verifyTarball(tarball: string, manifest: PackageManifest, reposit
   if (!types.includes('CalendarEventModalProps') || !types.includes('CalendarEventModalResult')) {
     throw new Error('Package tarball is missing the public custom event modal types')
   }
+
+  const stylesheet = runCommand(['tar', '-xOf', tarball, 'package/dist/runtime/assets/calendar.css'], repositoryRoot)
+
+  if (!stylesheet.includes('@theme prefix(uical) inline') || !stylesheet.includes('@custom-variant cal')) {
+    throw new Error('Package stylesheet is missing its prefixed and scoped Tailwind configuration')
+  }
+
+  if (stylesheet.includes('prefers-color-scheme') || stylesheet.includes('.dark') || stylesheet.includes(':root') || stylesheet.includes(':host')) {
+    throw new Error('Package stylesheet contains global or system-color-mode styles')
+  }
+
+  const styleSelectors = [...stylesheet.matchAll(/(?:^|\n)\s*([^@\n][^{\n]*)\s*\{/g)].map(match => match[1]!.trim())
+
+  if (styleSelectors.some(selector => !selector.startsWith('.ui-calendar'))) {
+    throw new Error(`Package stylesheet contains selectors outside .ui-calendar:\n${styleSelectors.filter(selector => !selector.startsWith('.ui-calendar')).join('\n')}`)
+  }
 }
 
 async function verifyConsumer(tarball: string, manifest: PackageManifest, directory: string, repositoryRoot: string): Promise<void> {

@@ -21,8 +21,8 @@ defineExpose({ calendar })
 </script>
 
 <template>
-  <div class="ui-calendar relative flex h-full min-h-152 overflow-hidden bg-default text-default">
-    <div class="relative flex min-w-0 flex-1 flex-col overflow-hidden">
+  <div class="ui-calendar uical:cal:relative uical:cal:flex uical:cal:h-full uical:cal:min-h-152 uical:cal:overflow-hidden uical:cal:bg-default uical:cal:text-default">
+    <div class="uical:cal:relative uical:cal:flex uical:cal:min-w-0 uical:cal:flex-1 uical:cal:flex-col uical:cal:overflow-hidden">
       <CalendarToolbar
         :title="title"
         :view-switcher-placement="props.viewSwitcherPlacement ?? 'center'"
@@ -46,10 +46,10 @@ defineExpose({ calendar })
         color="error"
         variant="subtle"
         :title="calendar.error.value"
-        class="absolute inset-x-4 top-18 z-40"
+        class="uical:cal:absolute uical:cal:inset-x-4 uical:cal:top-18 uical:cal:z-40"
       />
 
-      <div class="absolute inset-0 flex min-h-0 flex-col">
+      <div class="uical:cal:absolute uical:cal:inset-0 uical:cal:flex uical:cal:min-h-0 uical:cal:flex-col">
         <CalendarMonthView v-if="calendar.view.value === 'month'" />
         <CalendarWeekView v-else />
       </div>

@@ -1,6 +1,4 @@
 import { addComponentsDir, addImportsDir, createResolver, defineNuxtModule } from '@nuxt/kit'
-import { defu } from 'defu'
-import { uiDefaults } from './ui-config'
 
 export interface NuxtUiCalendarOptions {
   prefix: string
@@ -24,8 +22,6 @@ export default defineNuxtModule<NuxtUiCalendarOptions>({
   },
   setup(options, nuxt) {
     const { resolve } = createResolver(import.meta.url)
-
-    Object.assign(nuxt.options.appConfig.ui, defu(nuxt.options.appConfig.ui, uiDefaults))
 
     addComponentsDir({
       path: resolve('./runtime/components'),

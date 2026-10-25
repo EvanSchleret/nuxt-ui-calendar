@@ -13,30 +13,30 @@ const calendar = useCalendar()
 const previewEnd = ref<Date | null>(null)
 
 const eventBlockClasses: Record<CalendarColor, string> = {
-  primary: 'bg-primary/15 hover:bg-primary/25 data-active:bg-primary/25 text-primary border-primary',
-  secondary: 'bg-secondary/15 hover:bg-secondary/25 data-active:bg-secondary/25 text-secondary border-secondary',
-  info: 'bg-info/15 hover:bg-info/25 data-active:bg-info/25 text-info border-info',
-  success: 'bg-success/15 hover:bg-success/25 data-active:bg-success/25 text-success border-success',
-  warning: 'bg-warning/15 hover:bg-warning/25 data-active:bg-warning/25 text-warning border-warning',
-  error: 'bg-error/15 hover:bg-error/25 data-active:bg-error/25 text-error border-error'
+  primary: 'uical:cal:bg-primary/15 uical:cal:hover:bg-primary/25 uical:cal:data-active:bg-primary/25 uical:cal:text-primary uical:cal:border-primary',
+  secondary: 'uical:cal:bg-secondary/15 uical:cal:hover:bg-secondary/25 uical:cal:data-active:bg-secondary/25 uical:cal:text-secondary uical:cal:border-secondary',
+  info: 'uical:cal:bg-info/15 uical:cal:hover:bg-info/25 uical:cal:data-active:bg-info/25 uical:cal:text-info uical:cal:border-info',
+  success: 'uical:cal:bg-success/15 uical:cal:hover:bg-success/25 uical:cal:data-active:bg-success/25 uical:cal:text-success uical:cal:border-success',
+  warning: 'uical:cal:bg-warning/15 uical:cal:hover:bg-warning/25 uical:cal:data-active:bg-warning/25 uical:cal:text-warning uical:cal:border-warning',
+  error: 'uical:cal:bg-error/15 uical:cal:hover:bg-error/25 uical:cal:data-active:bg-error/25 uical:cal:text-error uical:cal:border-error'
 }
 
 const calendarDotClasses: Record<CalendarColor, string> = {
-  primary: 'bg-primary',
-  secondary: 'bg-secondary',
-  info: 'bg-info',
-  success: 'bg-success',
-  warning: 'bg-warning',
-  error: 'bg-error'
+  primary: 'uical:cal:bg-primary',
+  secondary: 'uical:cal:bg-secondary',
+  info: 'uical:cal:bg-info',
+  success: 'uical:cal:bg-success',
+  warning: 'uical:cal:bg-warning',
+  error: 'uical:cal:bg-error'
 }
 
 const eventOutlineClasses: Record<CalendarColor, string> = {
-  primary: 'outline-primary/25',
-  secondary: 'outline-secondary/25',
-  info: 'outline-info/25',
-  success: 'outline-success/25',
-  warning: 'outline-warning/25',
-  error: 'outline-error/25'
+  primary: 'uical-outline-primary',
+  secondary: 'uical-outline-secondary',
+  info: 'uical-outline-info',
+  success: 'uical-outline-success',
+  warning: 'uical-outline-warning',
+  error: 'uical-outline-error'
 }
 
 const calendarColor = computed(() => calendar.calendars.value.find(item => item.id === props.event.calendarId)?.color ?? 'primary')
@@ -107,8 +107,8 @@ function startResize(event: PointerEvent) {
   <button
     type="button"
     data-event
-    class="absolute flex flex-col items-start overflow-hidden rounded-xs px-3 py-1 text-left text-xs transition-colors select-none focus-visible:outline-3"
-    :class="[eventBlockClasses[calendarColor], eventOutlineClasses[calendarColor], 'z-10']"
+    class="uical:cal:absolute uical:cal:flex uical:cal:flex-col uical:cal:items-start uical:cal:overflow-hidden uical:cal:rounded-xs uical:cal:px-3 uical:cal:py-1 uical:cal:text-left uical:cal:text-xs uical-transition-colors uical:cal:select-none uical-focus-outline"
+    :class="[eventBlockClasses[calendarColor], eventOutlineClasses[calendarColor], 'uical:cal:z-10']"
     :style="eventStyle"
     :draggable="true"
     :aria-label="event.allDay ? calendar.t('allDayEvent', { title: event.title }) : `${event.title}, ${timeRange}`"
@@ -116,9 +116,9 @@ function startResize(event: PointerEvent) {
     @dragstart="onDragStart"
     @dblclick.stop
   >
-    <span class="absolute inset-y-1 inset-s-1 w-1 rounded-full" :class="calendarDotClasses[calendarColor]" />
-    <span class="w-full truncate font-medium">{{ event.title }}</span>
-    <span v-if="!compact" class="w-full truncate text-[10px] tabular-nums opacity-80">{{ timeRange }}</span>
+    <span class="uical:cal:absolute uical:cal:inset-y-1 uical:cal:inset-s-1 uical:cal:w-1 uical:cal:rounded-full" :class="calendarDotClasses[calendarColor]" />
+    <span class="uical:cal:w-full uical:cal:truncate uical-font-medium">{{ event.title }}</span>
+    <span v-if="!compact" class="uical:cal:w-full uical:cal:truncate uical:cal:text-[10px] uical-tabular-nums uical:cal:opacity-80">{{ timeRange }}</span>
     <span
       v-if="!event.allDay"
       data-resize-handle
@@ -126,7 +126,7 @@ function startResize(event: PointerEvent) {
       aria-orientation="horizontal"
       :aria-label="calendar.t('resizeEvent', { title: event.title })"
       tabindex="0"
-      class="absolute inset-x-0 bottom-0 h-2 cursor-ns-resize"
+      class="uical:cal:absolute uical:cal:inset-x-0 uical:cal:bottom-0 uical:cal:h-2 uical:cal:cursor-ns-resize"
       @pointerdown="startResize"
     />
   </button>

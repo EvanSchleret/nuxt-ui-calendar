@@ -32,21 +32,21 @@ function changeView(value: string | number) {
 </script>
 
 <template>
-  <header class="absolute inset-x-0 top-0 z-10 flex h-[calc(var(--ui-header-height)+0.5rem)] items-center gap-2 border-b border-default bg-default px-4 pt-2 sm:gap-4">
+  <header class="uical:cal:absolute uical:cal:inset-x-0 uical:cal:top-0 uical:cal:z-10 uical:cal:flex uical:cal:h-[calc(var(--ui-header-height)+0.5rem)] uical:cal:items-center uical:cal:gap-2 uical-border-bottom uical:cal:border-default uical:cal:bg-default uical:cal:px-4 uical:cal:pt-2 uical:cal:sm:gap-4">
     <h1
-      class="flex min-w-0 flex-1 items-baseline gap-1.5 truncate text-xl tracking-tight transition-opacity duration-0 sm:text-2xl"
+      class="uical:cal:flex uical:cal:min-w-0 uical:cal:flex-1 uical:cal:items-baseline uical:cal:gap-1.5 uical:cal:truncate uical:cal:text-xl uical-tracking-tight uical-transition-opacity uical-duration-0 uical:cal:sm:text-2xl"
       :class="[
-        calendar.view.value === 'month' && calendar.monthLabelsVisible.value ? 'opacity-0 delay-150' : 'opacity-100',
-        props.viewSwitcherPlacement === 'right' ? 'order-1' : undefined
+        calendar.view.value === 'month' && calendar.monthLabelsVisible.value ? 'uical:cal:opacity-0 uical:cal:delay-150' : 'uical:cal:opacity-100',
+        props.viewSwitcherPlacement === 'right' ? 'uical:cal:order-1' : undefined
       ]"
     >
-      <span class="truncate font-bold text-highlighted">{{ title.months }}</span>
-      <span class="hidden font-normal text-muted sm:inline">{{ title.year }}</span>
+      <span class="uical:cal:truncate uical-font-bold uical:cal:text-highlighted">{{ title.months }}</span>
+      <span class="uical:cal:hidden uical-font-normal uical:cal:text-muted uical:cal:sm:inline">{{ title.year }}</span>
     </h1>
 
     <div
-      class="shrink-0"
-      :class="props.viewSwitcherPlacement === 'right' ? 'order-3' : 'mx-auto'"
+      class="uical-view-switcher uical:cal:shrink-0"
+      :class="props.viewSwitcherPlacement === 'right' ? 'uical:cal:order-3' : 'uical:cal:mx-auto'"
     >
       <slot name="view-switcher" v-bind="slotProps">
         <UTabs
@@ -55,21 +55,21 @@ function changeView(value: string | number) {
           :content="false"
           size="sm"
           color="neutral"
-          :ui="{ indicator: 'bg-default', trigger: 'data-[state=active]:z-10 data-[state=active]:text-highlighted data-[state=active]:before:bg-default' }"
-          class="w-20 sm:w-42 lg:w-48"
+          :ui="{ indicator: 'uical:cal:bg-default', trigger: 'uical:cal:data-[state=active]:z-10 uical:cal:data-[state=active]:text-highlighted' }"
+          class="uical:cal:w-20 uical:cal:sm:w-42 uical:cal:lg:w-48"
           @update:model-value="changeView"
         >
           <template #default="{ item }">
-            <span class="sm:hidden">{{ item.label.charAt(0) }}</span>
-            <span class="hidden sm:inline">{{ item.label }}</span>
+            <span class="uical:cal:sm:hidden">{{ item.label.charAt(0) }}</span>
+            <span class="uical:cal:hidden uical:cal:sm:inline">{{ item.label }}</span>
           </template>
         </UTabs>
       </slot>
     </div>
 
     <div
-      class="flex items-center justify-end gap-1 sm:gap-2 md:flex-1"
-      :class="props.viewSwitcherPlacement === 'right' ? 'order-2' : undefined"
+      class="uical:cal:flex uical:cal:items-center uical:cal:justify-end uical:cal:gap-1 uical:cal:sm:gap-2 uical:cal:md:flex-1"
+      :class="props.viewSwitcherPlacement === 'right' ? 'uical:cal:order-2' : undefined"
     >
       <UBadge
         v-if="calendar.online.value && calendar.pendingCount.value"
@@ -95,7 +95,7 @@ function changeView(value: string | number) {
       </slot>
       <slot name="today" v-bind="slotProps">
         <UTooltip :text="calendar.t('today')">
-          <UButton color="neutral" variant="soft" size="sm" class="hidden sm:inline-flex" @click="calendar.goToToday()">{{ calendar.t('today') }}</UButton>
+          <UButton color="neutral" variant="soft" size="sm" class="uical:cal:hidden uical:cal:sm:inline-flex" @click="calendar.goToToday()">{{ calendar.t('today') }}</UButton>
         </UTooltip>
       </slot>
       <slot name="next" v-bind="slotProps">

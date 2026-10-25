@@ -42,7 +42,6 @@
   "dependencies": {
     "@nuxt/kit": "^4.6.2",
     "@internationalized/date": "^3.12.4",
-    "defu": "^6.1.7",
     "date-fns": "^4.4.0"
   },
   "peerDependencies": {

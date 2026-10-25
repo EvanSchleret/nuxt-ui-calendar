@@ -11,7 +11,7 @@ const t = (key: 'cancel' | 'deleteEvent') => translateCalendar(props.locale, key
 </script>
 
 <template>
-  <UModal :title="title" :description="description" :ui="{ footer: 'justify-end' }" @update:open="open => !open && emit('close', false)">
+  <UModal :title="title" :description="description" :ui="{ content: 'ui-calendar', footer: 'uical:cal:justify-end' }" @update:open="open => !open && emit('close', false)">
     <template #footer>
       <UButton :label="t('cancel')" color="neutral" variant="outline" @click="emit('close', false)" />
       <UButton :label="t('deleteEvent')" color="error" @click="emit('close', true)" />

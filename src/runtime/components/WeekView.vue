@@ -98,22 +98,22 @@ function createAllDay(day: Date) {
 </script>
 
 <template>
-  <div data-calendar-view="week" class="relative flex min-h-0 flex-1 flex-col">
+  <div data-calendar-view="week" class="uical:cal:relative uical:cal:flex uical:cal:min-h-0 uical:cal:flex-1 uical:cal:flex-col">
     <UScrollArea
       ref="container"
       :style="{ scrollPaddingTop: chromeOffset }"
-      class="z-0 flex-1 snap-y snap-proximity scrollbar-gutter-stable"
+      class="uical:cal:z-0 uical:cal:flex-1 uical-scroll-y uical:cal:scrollbar-gutter-stable"
     >
       <div
         data-week-grid
-        class="grid"
+        class="uical:cal:grid"
         :style="{ ...gridStyle, paddingTop: chromeOffset, marginTop: mounted ? undefined : startPull }"
       >
-        <div class="relative" :style="{ height: `${24 * HOUR_HEIGHT}px` }">
+        <div class="uical:cal:relative" :style="{ height: `${24 * HOUR_HEIGHT}px` }">
           <span
             v-for="hour in hours"
             :key="hour"
-            class="absolute inset-e-2 -translate-y-1/2 text-[11px] text-dimmed tabular-nums"
+            class="uical:cal:absolute uical:cal:inset-e-2 uical-center-y uical:cal:text-[11px] uical:cal:text-dimmed uical-tabular-nums"
             :style="{ top: `${hour * HOUR_HEIGHT}px` }"
           >
             {{ formatHour(hour) }}
@@ -131,19 +131,19 @@ function createAllDay(day: Date) {
     </UScrollArea>
 
     <div
-      class="absolute inset-x-0 top-[calc(var(--ui-header-height)+0.5rem)] z-30 scrollbar-gutter-stable overflow-hidden border-b border-default bg-default"
+      class="uical:cal:absolute uical:cal:inset-x-0 uical:cal:top-[calc(var(--ui-header-height)+0.5rem)] uical:cal:z-30 uical:cal:scrollbar-gutter-stable uical:cal:overflow-hidden uical-border-bottom uical:cal:border-default uical:cal:bg-default"
     >
-      <div class="grid" :style="gridStyle">
+      <div class="uical:cal:grid" :style="gridStyle">
         <div />
         <div
           v-for="day in days"
           :key="localDateTime(day).slice(0, 10)"
-          class="flex items-center justify-center gap-1 border-s border-default py-2 text-sm"
+          class="uical:cal:flex uical:cal:items-center uical:cal:justify-center uical:cal:gap-1 uical-border-start uical:cal:border-default uical:cal:py-2 uical:cal:text-sm"
         >
-          <span class="text-muted">{{ dayLabel(day) }}</span>
+          <span class="uical:cal:text-muted">{{ dayLabel(day) }}</span>
           <span
-            class="flex size-6 items-center justify-center rounded-full font-semibold"
-            :class="isToday(day) ? 'bg-primary text-inverted' : 'text-highlighted'"
+            class="uical:cal:flex uical:cal:size-6 uical:cal:items-center uical:cal:justify-center uical:cal:rounded-full uical-font-semibold"
+            :class="isToday(day) ? 'uical:cal:bg-primary uical:cal:text-inverted' : 'uical:cal:text-highlighted'"
           >
             {{ day.getDate() }}
           </span>
@@ -151,16 +151,16 @@ function createAllDay(day: Date) {
       </div>
 
       <div
-        class="grid border-t border-default"
+        class="uical:cal:grid uical-border-top uical:cal:border-default"
         :style="{ ...gridStyle, gridTemplateRows: `repeat(${allDayLanes}, ${ALL_DAY_LANE_HEIGHT}px)` }"
       >
-        <span class="row-span-full self-center pe-2 text-end text-[10px] text-dimmed">{{ calendar.t('allDay') }}</span>
+        <span class="uical:cal:row-span-full uical:cal:self-center uical:cal:pe-2 uical:cal:text-end uical:cal:text-[10px] uical:cal:text-dimmed">{{ calendar.t('allDay') }}</span>
 
         <div
           v-for="(day, index) in days"
           :key="`all-day-${localDateTime(day).slice(0, 10)}`"
           :data-date="localDateTime(day).slice(0, 10)"
-          class="row-span-full border-s border-default"
+          class="uical:cal:row-span-full uical-border-start uical:cal:border-default"
           :style="{ gridColumn: index + 2 }"
           @dblclick="createAllDay(day)"
         />
@@ -169,11 +169,11 @@ function createAllDay(day: Date) {
           v-for="{ event, colStart, colSpan, lane } in allDayEvents"
           :key="event.id"
           :event="event"
-          class="mx-1 mt-1 h-5"
+          class="uical:cal:mx-1 uical:cal:mt-1 uical:cal:h-5"
           :style="{ gridColumn: `${colStart + 2} / span ${colSpan}`, gridRow: lane + 1 }"
         />
       </div>
     </div>
-    <p class="sr-only">{{ heading }}. {{ calendar.t('doubleClickEmptySlot') }} {{ calendar.t('dragEventsToMove') }}</p>
+    <p class="uical:cal:sr-only">{{ heading }}. {{ calendar.t('doubleClickEmptySlot') }} {{ calendar.t('dragEventsToMove') }}</p>
   </div>
 </template>

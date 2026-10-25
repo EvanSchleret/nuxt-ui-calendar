@@ -1,34 +1,186 @@
-@layer theme, utilities;
-
-@import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 
 @source "../components/**/*.vue";
 @source "../utils/**/*.ts";
 
-@theme inline {
+@theme prefix(uical) inline {
+  --spacing: 0.25rem;
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --container-lg: 32rem;
+  --container-2xl: 42rem;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 2rem;
+  --radius-xs: calc(var(--ui-radius) * 0.5);
+  --radius-md: calc(var(--ui-radius) * 1.5);
   --color-primary: var(--ui-primary);
   --color-secondary: var(--ui-secondary);
   --color-info: var(--ui-info);
   --color-success: var(--ui-success);
   --color-warning: var(--ui-warning);
   --color-error: var(--ui-error);
+  --text-color-dimmed: var(--ui-text-dimmed);
+  --text-color-muted: var(--ui-text-muted);
+  --text-color-toned: var(--ui-text-toned);
+  --text-color-default: var(--ui-text);
+  --text-color-highlighted: var(--ui-text-highlighted);
+  --text-color-inverted: var(--ui-text-inverted);
+  --background-color-default: var(--ui-bg);
+  --background-color-muted: var(--ui-bg-muted);
+  --background-color-elevated: var(--ui-bg-elevated);
+  --background-color-accented: var(--ui-bg-accented);
+  --background-color-inverted: var(--ui-bg-inverted);
+  --border-color-default: var(--ui-border);
+  --border-color-muted: var(--ui-border-muted);
+  --border-color-accented: var(--ui-border-accented);
+  --border-color-inverted: var(--ui-border-inverted);
 }
+
+@custom-variant cal (&:where(.ui-calendar, .ui-calendar *));
 
 @layer components {
   .ui-calendar {
-    --control-bg: rgb(0 0 0 / 0.05);
-    --control-bg-hover: rgb(0 0 0 / 0.09);
-    --well-bg: rgb(0 0 0 / 0.05);
+    --control-bg: color-mix(in srgb, var(--ui-bg-accented) 50%, transparent);
+    --control-bg-hover: color-mix(in srgb, var(--ui-bg-accented) 80%, transparent);
     --ui-header-height: 4rem;
     --calendar-hour-height: 4rem;
     min-height: 38rem;
   }
 
-  .dark .ui-calendar {
-    --control-bg: rgb(255 255 255 / 0.06);
-    --control-bg-hover: rgb(255 255 255 / 0.10);
-    --well-bg: rgb(0 0 0 / 0.22);
+  .ui-calendar .uical-border-0 {
+    border-width: 0;
+  }
+
+  .ui-calendar .uical-border-bottom {
+    border-bottom-width: 1px;
+    border-style: solid;
+  }
+
+  .ui-calendar .uical-border-start {
+    border-inline-start-width: 1px;
+    border-style: solid;
+  }
+
+  .ui-calendar .uical-border-top {
+    border-top-width: 1px;
+    border-style: solid;
+  }
+
+  .ui-calendar .uical-border-top-2 {
+    border-top-width: 2px;
+    border-style: solid;
+  }
+
+  .ui-calendar.uical-sidebar-panel {
+    box-shadow: 0 0 0 1px var(--ui-border), 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  }
+
+  .ui-calendar.uical-sidebar-panel > :not(:last-child) {
+    border-style: none;
+  }
+
+  .ui-calendar .uical-font-normal {
+    font-weight: 400;
+  }
+
+  .ui-calendar .uical-font-medium {
+    font-weight: 500;
+  }
+
+  .ui-calendar .uical-font-semibold {
+    font-weight: 600;
+  }
+
+  .ui-calendar .uical-font-bold {
+    font-weight: 700;
+  }
+
+  .ui-calendar .uical-tracking-tight {
+    letter-spacing: -0.025em;
+  }
+
+  .ui-calendar .uical-tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ui-calendar .uical-center-y {
+    transform: translateY(-50%);
+  }
+
+  .ui-calendar .uical-scroll-y {
+    scroll-snap-type: y proximity;
+  }
+
+  .ui-calendar .uical-snap-start {
+    scroll-snap-align: start;
+  }
+
+  .ui-calendar .uical-focus-outline:focus-visible {
+    outline-width: 3px;
+    outline-style: solid;
+  }
+
+  .ui-calendar .uical-outline-primary {
+    outline-color: color-mix(in srgb, var(--ui-primary) 25%, transparent);
+  }
+
+  .ui-calendar .uical-outline-secondary {
+    outline-color: color-mix(in srgb, var(--ui-secondary) 25%, transparent);
+  }
+
+  .ui-calendar .uical-outline-info {
+    outline-color: color-mix(in srgb, var(--ui-info) 25%, transparent);
+  }
+
+  .ui-calendar .uical-outline-success {
+    outline-color: color-mix(in srgb, var(--ui-success) 25%, transparent);
+  }
+
+  .ui-calendar .uical-outline-warning {
+    outline-color: color-mix(in srgb, var(--ui-warning) 25%, transparent);
+  }
+
+  .ui-calendar .uical-outline-error {
+    outline-color: color-mix(in srgb, var(--ui-error) 25%, transparent);
+  }
+
+  .ui-calendar .uical-outline-inverted {
+    outline-color: color-mix(in srgb, var(--ui-text-inverted) 25%, transparent);
+  }
+
+  .ui-calendar .uical-transition-colors {
+    transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ui-calendar .uical-transition-opacity {
+    transition-property: opacity;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ui-calendar .uical-duration-0 {
+    transition-duration: 0ms;
+  }
+
+  .ui-calendar .uical-duration-150 {
+    transition-duration: 150ms;
+  }
+
+  .ui-calendar .uical-duration-300 {
+    transition-duration: 300ms;
+  }
+
+  .ui-calendar .uical-view-switcher [data-state="active"]::before {
+    background-color: var(--ui-bg);
   }
 
   @media (max-width: 639px) {

@@ -65,41 +65,41 @@ function requestDelete() {
   <UModal
     :title="event ? t('editEvent') : t('newEvent')"
     :description="event ? t('updateEventDetails') : t('addEventToCalendar')"
-    :ui="{ content: 'sm:max-w-lg' }"
+    :ui="{ content: 'ui-calendar uical:cal:sm:max-w-lg' }"
     @update:open="open => !open && emit('close', null)"
   >
     <template #body>
-      <form class="flex flex-col gap-4" @submit.prevent="save">
+      <form class="uical:cal:flex uical:cal:flex-col uical:cal:gap-4" @submit.prevent="save">
         <UFormField :label="t('title')" required :error="titleError || undefined">
-          <UInput v-model="title" autofocus maxlength="100" class="w-full" :placeholder="t('eventTitle')" />
+          <UInput v-model="title" autofocus maxlength="100" class="uical:cal:w-full" :placeholder="t('eventTitle')" />
         </UFormField>
 
         <UFormField v-if="calendars.length" :label="t('calendar')" required :error="calendarError || undefined">
-          <USelect v-model="calendarId" :items="calendarOptions" class="w-full" />
+          <USelect v-model="calendarId" :items="calendarOptions" class="uical:cal:w-full" />
         </UFormField>
 
         <UCheckbox v-model="allDay" :label="t('allDayCheckbox')" />
 
-        <div v-if="!allDay" class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div v-if="!allDay" class="uical:cal:grid uical:cal:grid-cols-1 uical:cal:gap-3 uical:cal:sm:grid-cols-2">
           <UFormField :label="t('starts')" required>
-            <UInput v-model="start" type="datetime-local" class="w-full" />
+            <UInput v-model="start" type="datetime-local" class="uical:cal:w-full" />
           </UFormField>
           <UFormField :label="t('ends')" required :error="dateError || undefined">
-            <UInput v-model="end" type="datetime-local" class="w-full" />
+            <UInput v-model="end" type="datetime-local" class="uical:cal:w-full" />
           </UFormField>
         </div>
 
         <UFormField :label="t('description')">
-          <UTextarea v-model="description" autoresize :maxrows="5" maxlength="1000" class="w-full" :placeholder="t('addNotes')" />
+          <UTextarea v-model="description" autoresize :maxrows="5" maxlength="1000" class="uical:cal:w-full" :placeholder="t('addNotes')" />
         </UFormField>
       </form>
     </template>
 
     <template #footer>
-      <div class="flex w-full items-center justify-between gap-3">
+      <div class="uical:cal:flex uical:cal:w-full uical:cal:items-center uical:cal:justify-between uical:cal:gap-3">
         <UButton v-if="event" :label="t('delete')" color="error" variant="ghost" @click="requestDelete" />
         <span v-else />
-        <div class="flex items-center gap-2">
+        <div class="uical:cal:flex uical:cal:items-center uical:cal:gap-2">
           <UButton :label="t('cancel')" color="neutral" variant="outline" @click="emit('close', null)" />
           <UButton :label="t('saveEvent')" color="primary" @click="save" />
         </div>

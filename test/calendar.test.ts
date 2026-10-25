@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'bun:test'
+import { compile } from '@tailwindcss/node'
+import { Scanner } from '@tailwindcss/oxide'
+import { resolve } from 'node:path'
 import { daysForView, localDateTime, monthViewFocusDate, weekIndexForDate } from '../src/runtime/utils/dates'
 import { hiddenCalendarIdsFor } from '../src/runtime/utils/calendars'
 import { layoutDay } from '../src/runtime/utils/layout'
 import { translateCalendar } from '../src/runtime/utils/i18n'
 import type { CalendarDefinition, CalendarEvent } from '../src/runtime/types'
-import { uiDefaults } from '../src/ui-config'
 
 describe('calendar date utilities', () => {
   it('formats local datetimes without a timezone suffix', () => {
@@ -84,17 +86,54 @@ describe('calendar translations', () => {
 })
 
 describe('calendar integration styles', () => {
-  it('generates runtime utilities without resetting the host app styles', async () => {
-    const stylesheet = await Bun.file(new URL('../src/runtime/assets/calendar.css', import.meta.url)).text()
+  const stylesheetPath = resolve(import.meta.dir, '../src/runtime/assets/calendar.css')
+  const stylesheet = Bun.file(stylesheetPath)
 
-    expect(stylesheet).toContain('@import "tailwindcss/theme.css" layer(theme)')
-    expect(stylesheet).toContain('@import "tailwindcss/utilities.css" layer(utilities)')
-    expect(stylesheet).toContain('@source "../components/**/*.vue"')
-    expect(stylesheet).toContain('--color-primary: var(--ui-primary)')
-    expect(stylesheet).not.toContain('#FF383C')
+  it('follows the consuming Nuxt UI theme in light mode when the system is dark', async () => {
+    const calendarCss = await stylesheet.text()
+    const nuxtUiCss = await Bun.file(resolve(import.meta.dir, '../node_modules/@nuxt/ui/dist/runtime/index.css')).text()
+
+    expect(nuxtUiCss).toMatch(/\.light[^{}]*\{[^}]*--ui-bg:#fff/)
+    expect(calendarCss).toContain('var(--ui-bg)')
+    expect(calendarCss).not.toContain('prefers-color-scheme')
   })
 
-  it('inherits semantic colors from the consuming Nuxt UI app', () => {
-    expect(uiDefaults).not.toHaveProperty('colors')
+  it('follows the consuming Nuxt UI theme in dark mode when the system is light', async () => {
+    const calendarCss = await stylesheet.text()
+    const nuxtUiCss = await Bun.file(resolve(import.meta.dir, '../node_modules/@nuxt/ui/dist/runtime/index.css')).text()
+
+    expect(nuxtUiCss).toMatch(/\.dark\{[^}]*--ui-bg:var\(--ui-color-neutral-900\)/)
+    expect(calendarCss).toContain('var(--ui-bg)')
+    expect(calendarCss).not.toContain('prefers-color-scheme')
+  })
+
+  it('compiles package utilities with a prefix and confines every selector to the calendar', async () => {
+    const compiler = await compile(await stylesheet.text(), {
+      base: resolve(import.meta.dir, '../src/runtime/assets'),
+      from: stylesheetPath,
+      onDependency() {}
+    })
+    const compiledCss = compiler.build(new Scanner({ sources: compiler.sources }).scan())
+    const selectorLines = compiledCss.split('\n').filter(line => /^\s*(?:\.|:where\(|:is\()/.test(line))
+    const classNames = selectorLines.flatMap(line => [...line.matchAll(/\.((?:\\.|[a-zA-Z0-9_-])+)/g)].map(match => match[1]!))
+
+    expect(compiledCss).toContain('.uical\\:cal\\:flex:where(.ui-calendar, .ui-calendar *)')
+    expect(compiledCss).toContain('.uical\\:cal\\:bg-default:where(.ui-calendar, .ui-calendar *)')
+    expect(compiledCss).not.toContain(':root')
+    expect(compiledCss).not.toContain(':host')
+    expect(compiledCss).not.toContain('@property')
+    expect(compiledCss).not.toContain('prefers-color-scheme')
+    expect(compiledCss).not.toMatch(/\n\s*(?:\*|::before|::after|::backdrop)\s*\{/)
+    expect(classNames.length).toBeGreaterThan(0)
+
+    for (const className of classNames) {
+      expect(className === 'ui-calendar' || className.startsWith('uical\\:cal\\:') || className.startsWith('uical-')).toBe(true)
+    }
+  })
+
+  it('does not alter the consuming app Nuxt UI defaults', async () => {
+    const moduleSource = await Bun.file(resolve(import.meta.dir, '../src/module.ts')).text()
+
+    expect(moduleSource).not.toContain('appConfig.ui')
   })
 })

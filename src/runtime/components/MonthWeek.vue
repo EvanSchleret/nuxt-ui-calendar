@@ -72,13 +72,13 @@ function createAllDay(day: Date) {
 </script>
 
 <template>
-  <div class="grid min-w-0 grid-cols-7 border-b border-default" :style="gridStyle">
+  <div class="uical:cal:grid uical:cal:min-w-0 uical:cal:grid-cols-7 uical-border-bottom uical:cal:border-default" :style="gridStyle">
     <div
       v-for="({ day }, index) in cells"
       :key="`day-${day.getTime()}`"
       :data-date="localDateTime(day).slice(0, 10)"
-      class="row-span-full border-default"
-      :class="index !== 0 && 'border-s'"
+      class="uical:cal:row-span-full uical:cal:border-default"
+      :class="index !== 0 && 'uical-border-start'"
       :style="{ gridColumn: index + 1 }"
       @dblclick="createAllDay(day)"
     />
@@ -87,10 +87,10 @@ function createAllDay(day: Date) {
       v-for="({ day }, index) in cells"
       :key="`number-${day.getTime()}`"
       type="button"
-      class="row-start-1 m-0.5 inline-flex h-6 min-w-6 items-center justify-center justify-self-end rounded-full p-1 text-xs font-semibold transition-colors select-none focus-visible:outline-3"
+      class="uical:cal:row-start-1 uical:cal:m-0.5 uical:cal:inline-flex uical:cal:h-6 uical:cal:min-w-6 uical:cal:items-center uical:cal:justify-center uical:cal:justify-self-end uical:cal:rounded-full uical:cal:p-1 uical:cal:text-xs uical-font-semibold uical-transition-colors uical:cal:select-none uical-focus-outline"
       :class="day.toDateString() === new Date().toDateString()
-        ? 'text-inverted bg-primary active:bg-primary/75 outline-primary/25'
-        : 'text-default hover:bg-(--control-bg) active:bg-(--control-bg) outline-inverted/25'"
+        ? 'uical:cal:text-inverted uical:cal:bg-primary uical:cal:active:bg-primary/75 uical-outline-primary'
+        : 'uical:cal:text-default uical:cal:hover:bg-(--control-bg) uical:cal:active:bg-(--control-bg) uical-outline-inverted'"
       :style="{ gridColumn: index + 1 }"
       :aria-label="calendar.t('openDate', { date: day.toLocaleDateString(calendar.locale, { dateStyle: 'full' }) })"
       @click="openDay(day)"
@@ -101,7 +101,7 @@ function createAllDay(day: Date) {
     <template v-for="{ event, colStart, colSpan, lane } in bars" :key="event.id">
       <CalendarEventChip
         :event="event"
-        class="mx-0.5 self-start"
+        class="uical:cal:mx-0.5 uical:cal:self-start"
         :style="{ gridColumn: `${colStart + 1} / span ${colSpan}`, gridRow: lane + 2 }"
       />
     </template>
@@ -112,27 +112,27 @@ function createAllDay(day: Date) {
         :key="event.id"
         :event="event"
         show-time
-        class="mx-0.5 self-start max-lg:**:data-time:hidden"
+        class="uical:cal:mx-0.5 uical:cal:self-start uical:cal:max-lg:**:data-time:hidden"
         :style="{ gridColumn: index + 1, gridRow: slot + 2 }"
       />
 
       <UPopover
         v-if="more"
         :content="{ side: 'right' }"
-        :ui="{ content: 'flex flex-col gap-0.5 p-2 w-64' }"
+        :ui="{ content: 'ui-calendar uical:cal:flex uical:cal:flex-col uical:cal:gap-0.5 uical:cal:p-2 uical:cal:w-64' }"
       >
         <template #default="{ open }">
           <UButton
             color="neutral"
             variant="ghost"
             size="xs"
-            class="mx-0.5 justify-start self-start px-1.5 py-0.5 font-normal text-muted"
-            :class="open && 'bg-elevated'"
+            class="uical:cal:mx-0.5 uical:cal:justify-start uical:cal:self-start uical:cal:px-1.5 uical:cal:py-0.5 uical-font-normal uical:cal:text-muted"
+            :class="open && 'uical:cal:bg-elevated'"
             :style="{ gridColumn: index + 1, gridRow: more.slot + 2 }"
           >
-            <span class="lg:hidden">+{{ more.hidden }}</span>
-            <span class="hidden lg:inline">+{{ more.hidden }} {{ calendar.t('more') }}</span>
-            <span class="sr-only">{{ calendar.t('showMoreEvents', { count: more.hidden }) }}</span>
+            <span class="uical:cal:lg:hidden">+{{ more.hidden }}</span>
+            <span class="uical:cal:hidden uical:cal:lg:inline">+{{ more.hidden }} {{ calendar.t('more') }}</span>
+            <span class="uical:cal:sr-only">{{ calendar.t('showMoreEvents', { count: more.hidden }) }}</span>
           </UButton>
         </template>
 
