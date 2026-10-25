@@ -1,6 +1,6 @@
 {
   "name": "@evanschleret/nuxt-ui-calendar",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "author": "@evanschleret",
   "description": "A reusable Nuxt UI calendar module with day, week and month views.",
   "license": "MIT",
