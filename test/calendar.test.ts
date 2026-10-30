@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test'
 import { compile } from '@tailwindcss/node'
 import { Scanner } from '@tailwindcss/oxide'
 import { resolve } from 'node:path'
-import { daysForView, localDateTime, monthViewFocusDate, weekIndexForDate } from '../src/runtime/utils/dates'
+import { daysForView, formatCalendarTitle, localDateTime, monthViewFocusDate, stepDate, weekIndexForDate } from '../src/runtime/utils/dates'
 import { hiddenCalendarIdsFor } from '../src/runtime/utils/calendars'
 import { layoutDay } from '../src/runtime/utils/layout'
 import { translateCalendar } from '../src/runtime/utils/i18n'
@@ -20,6 +20,21 @@ describe('calendar date utilities', () => {
 
     expect(daysForView(date, 'week')).toHaveLength(7)
     expect(daysForView(date, 'month')).toHaveLength(42)
+  })
+
+  it('returns every day in the selected year', () => {
+    const leapYear = daysForView(new Date(2024, 9, 22), 'year')
+    const regularYear = daysForView(new Date(2026, 9, 22), 'year')
+
+    expect(leapYear).toHaveLength(366)
+    expect(leapYear[0]).toEqual(new Date(2024, 0, 1))
+    expect(leapYear.at(-1)).toEqual(new Date(2024, 11, 31))
+    expect(regularYear).toHaveLength(365)
+  })
+
+  it('steps and labels the year view', () => {
+    expect(stepDate(new Date(2024, 1, 29), 'year', 1)).toEqual(new Date(2025, 1, 28))
+    expect(formatCalendarTitle(new Date(2026, 9, 22), 'year')).toEqual({ months: '2026', year: '' })
   })
 
   it('locates the week containing the selected date', () => {
@@ -73,11 +88,13 @@ describe('calendar translations', () => {
     expect(translateCalendar('fr-CH', 'allDayCheckbox')).toBe('Toute la journée')
     expect(translateCalendar('fr-CH', 'week')).toBe('Semaine')
     expect(translateCalendar('fr-CH', 'month')).toBe('Mois')
+    expect(translateCalendar('fr-CH', 'year')).toBe('Année')
     expect(translateCalendar('fr-CH', 'today')).toBe('Aujourd’hui')
   })
 
   it('interpolates localized accessible labels', () => {
     expect(translateCalendar('fr-CH', 'openDate', { date: 'jeudi 22 octobre 2026' })).toBe('Ouvrir le jeudi 22 octobre 2026')
+    expect(translateCalendar('fr-CH', 'openMonth', { month: 'octobre' })).toBe('Ouvrir octobre')
   })
 
   it('falls back to English when a language has no calendar translations', () => {

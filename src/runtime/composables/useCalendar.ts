@@ -415,8 +415,8 @@ export function createCalendarController(props: CalendarAppProps, emit: Calendar
     const key = keyboardEvent.key.toLowerCase()
     if (key === 't') {
       goToToday()
-    } else if (key === 'd' || key === 'w' || key === 'm') {
-      setView(key === 'd' ? 'day' : key === 'w' ? 'week' : 'month')
+    } else if (key === 'd' || key === 'w' || key === 'm' || key === 'y') {
+      setView(key === 'd' ? 'day' : key === 'w' ? 'week' : key === 'm' ? 'month' : 'year')
     } else if (key === 'n') {
       void openEvent(undefined, date.value)
     } else if (keyboardEvent.key === 'ArrowLeft') {

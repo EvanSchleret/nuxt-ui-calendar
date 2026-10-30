@@ -4,7 +4,10 @@ import type { CalendarDefinition, CalendarEvent, CalendarView } from '@evanschle
 import CustomEventModal from '../components/CustomEventModal.vue'
 
 const route = useRoute()
-const view = computed<CalendarView>(() => route.params.view === 'month' ? 'month' : 'week')
+const view = computed<CalendarView>(() => {
+  const routeView = route.params.view
+  return routeView === 'day' || routeView === 'week' || routeView === 'month' || routeView === 'year' ? routeView : 'week'
+})
 const calendars: CalendarDefinition[] = [
   { id: 'work', name: 'Work', color: 'primary' }
 ]

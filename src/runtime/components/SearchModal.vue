@@ -25,7 +25,8 @@ const t = (key: Parameters<typeof translateCalendar>[1]) => translateCalendar(pr
 const views = computed<{ label: string, value: CalendarView, icon: string, key: string }[]>(() => [
   { label: t('day'), value: 'day', icon: 'i-lucide-calendar-range', key: 'd' },
   { label: t('week'), value: 'week', icon: 'i-lucide-calendar-days', key: 'w' },
-  { label: t('month'), value: 'month', icon: 'i-lucide-calendar', key: 'm' }
+  { label: t('month'), value: 'month', icon: 'i-lucide-calendar', key: 'm' },
+  { label: t('year'), value: 'year', icon: 'i-lucide-calendar-range', key: 'y' }
 ])
 
 const groups = computed<CommandPaletteGroup<CommandPaletteItem>[]>(() => [{

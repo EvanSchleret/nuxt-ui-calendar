@@ -1,4 +1,4 @@
-import { addDays, addMonths, differenceInCalendarDays, differenceInCalendarWeeks, startOfDay, startOfMonth, startOfWeek } from 'date-fns'
+import { addDays, addMonths, addYears, differenceInCalendarDays, differenceInCalendarWeeks, startOfDay, startOfMonth, startOfWeek, startOfYear } from 'date-fns'
 import type { CalendarDateRange, CalendarView } from '../types'
 
 export const HOUR_HEIGHT = 64
@@ -29,6 +29,12 @@ export function daysForView(date: Date, view: CalendarView, weekStartsOn = 1): D
     return [startOfDay(date)]
   }
 
+  if (view === 'year') {
+    const start = startOfYear(date)
+    const count = differenceInCalendarDays(addYears(start, 1), start)
+    return Array.from({ length: count }, (_, index) => addDays(start, index))
+  }
+
   if (view === 'week') {
     const start = startOfWeek(date, { weekStartsOn: weekStartsOn as 0 | 1 | 2 | 3 | 4 | 5 | 6 })
     return Array.from({ length: 7 }, (_, index) => addDays(start, index))
@@ -54,6 +60,10 @@ export function formatCalendarTitle(date: Date, view: CalendarView, locale = 'en
   const months = new Intl.DateTimeFormat(locale, { month: 'long' })
   const shortMonths = new Intl.DateTimeFormat(locale, { month: 'short' })
   const shortMonthYear = new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric' })
+
+  if (view === 'year') {
+    return { months: String(date.getFullYear()), year: '' }
+  }
 
   if (view === 'month') {
     return { months: months.format(date), year: String(date.getFullYear()) }
@@ -90,6 +100,10 @@ export function weekIndexForDate(date: Date, firstWeek: Date, weekCount: number)
 }
 
 export function stepDate(date: Date, view: CalendarView, direction: -1 | 1): Date {
+  if (view === 'year') {
+    return addYears(date, direction)
+  }
+
   if (view === 'month') {
     return addMonths(date, direction)
   }

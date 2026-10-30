@@ -5,6 +5,7 @@ import { createCalendarController, provideCalendar } from '#imports'
 import CalendarMonthView from './MonthView.vue'
 import CalendarToolbar from './Toolbar.vue'
 import CalendarWeekView from './WeekView.vue'
+import CalendarYearView from './YearView.vue'
 import type { CalendarAppEmits, CalendarAppProps, CalendarAppSlots } from '../types'
 import { formatCalendarTitle } from '../utils/dates'
 
@@ -50,7 +51,8 @@ defineExpose({ calendar })
       />
 
       <div class="uical:cal:absolute uical:cal:inset-0 uical:cal:flex uical:cal:min-h-0 uical:cal:flex-col">
-        <CalendarMonthView v-if="calendar.view.value === 'month'" />
+        <CalendarYearView v-if="calendar.view.value === 'year'" />
+        <CalendarMonthView v-else-if="calendar.view.value === 'month'" />
         <CalendarWeekView v-else />
       </div>
     </div>

@@ -1,7 +1,7 @@
 import type { Component, Ref, VNode } from 'vue'
 import type { CalendarMessageKey, CalendarMessageParams } from './utils/i18n'
 
-export type CalendarView = 'day' | 'week' | 'month'
+export type CalendarView = 'day' | 'week' | 'month' | 'year'
 export type CalendarColor = 'primary' | 'secondary' | 'info' | 'success' | 'warning' | 'error'
 
 export interface CalendarToolbarSlotProps {
