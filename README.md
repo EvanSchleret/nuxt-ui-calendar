@@ -244,7 +244,7 @@ The `playground/` directory exercises the module against a small sample calendar
 
 ## Versioning and support
 
-The package is pre-1.0.0, so public APIs may change in minor releases before the first stable release. From 1.0.0 onward, releases follow Semantic Versioning: breaking API changes require a major version.
+The package follows Semantic Versioning: breaking API changes require a major version.
 
 The peer dependency ranges are Nuxt `>=4.0.0` and Nuxt UI `^4.12.0`. See [SECURITY.md](SECURITY.md) for which package releases receive security fixes.
 
