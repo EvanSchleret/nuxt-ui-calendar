@@ -29,7 +29,20 @@ const scrollArea = useTemplateRef('scrollArea')
 const staticScrollArea = useTemplateRef('staticScrollArea')
 const scrollElement = shallowRef<HTMLElement | null>(null)
 const labels = shallowRef<{ key: number, month: string, year: string, y: number }[]>([])
+const visibleMonth = shallowRef<Date | null>(null)
+const focusMonth = computed(() => visibleMonth.value ?? calendar.date.value)
+const hasMobileToolbar = shallowRef(false)
+const virtualizeOptions = computed(() => ({
+  estimateSize: ROW_HEIGHT,
+  skipMeasurement: true,
+  overscan: 4,
+  paddingStart: CHROME_HEIGHT,
+  paddingEnd: hasMobileToolbar.value ? 96 : 0,
+  scrollPaddingStart: CHROME_HEIGHT,
+  initialOffset
+}))
 const labelOffsets = new Map<number, number>()
+let toolbarMediaQuery: MediaQueryList | null = null
 let viewportHeight = 0
 let labelsAwake = false
 let labelsTimer: ReturnType<typeof setTimeout> | undefined
@@ -148,6 +161,7 @@ function updateScrollState() {
     return
   }
 
+  visibleMonth.value = docked
   updateLabels(docked)
   if (!labelsAwake) {
     return
@@ -180,6 +194,10 @@ function onScroll(isScrolling: boolean) {
 }
 
 onMounted(async () => {
+  toolbarMediaQuery = window.matchMedia('(max-width: 1023px)')
+  hasMobileToolbar.value = toolbarMediaQuery.matches
+  toolbarMediaQuery.addEventListener('change', updateToolbarClearance)
+
   if (!calendar.infiniteScroll) {
     await scrollToStaticDate(calendar.date.value)
     return
@@ -201,6 +219,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  toolbarMediaQuery?.removeEventListener('change', updateToolbarClearance)
   scrollElement.value?.removeEventListener('scroll', updateScrollState)
   if (labelsTimer) {
     clearTimeout(labelsTimer)
@@ -213,6 +232,8 @@ watch(calendar.date, (date) => {
     return
   }
 
+  visibleMonth.value = calendar.infiniteScroll ? startOfMonth(date) : null
+
   if (!calendar.infiniteScroll) {
     void scrollToStaticDate(date)
     return
@@ -223,6 +244,10 @@ watch(calendar.date, (date) => {
   const center = visible?.length ? Math.round((visible[0]!.index + visible[visible.length - 1]!.index) / 2) : target
   scrollToDate(date, Math.abs(target - center) <= CHUNK_WEEKS * 2)
 }, { flush: 'sync' })
+
+function updateToolbarClearance() {
+  hasMobileToolbar.value = toolbarMediaQuery?.matches ?? false
+}
 </script>
 
 <template>
@@ -231,27 +256,28 @@ watch(calendar.date, (date) => {
       v-if="calendar.infiniteScroll"
       ref="scrollArea"
       :items="weeks"
-      :virtualize="{ estimateSize: ROW_HEIGHT, skipMeasurement: true, overscan: 4, paddingStart: CHROME_HEIGHT, scrollPaddingStart: CHROME_HEIGHT, initialOffset }"
+      :virtualize="virtualizeOptions"
       :ui="{ item: 'uical-snap-start' }"
-      :style="{ scrollPaddingTop: `${CHROME_HEIGHT}px` }"
+      :style="{ scrollPaddingTop: `${CHROME_HEIGHT}px`, scrollPaddingBottom: hasMobileToolbar ? '6rem' : undefined }"
       class="uical:cal:flex-1 uical-scroll-y uical:cal:scrollbar-gutter-stable"
       @scroll="onScroll"
     >
       <template #default="{ item }">
-        <CalendarMonthWeek :week-start="item" :style="{ height: `${ROW_HEIGHT}px` }" />
+        <CalendarMonthWeek :week-start="item" :focus-month="focusMonth" :style="{ height: `${ROW_HEIGHT}px` }" />
       </template>
     </UScrollArea>
 
     <div
       v-else
       ref="staticScrollArea"
-      class="uical:cal:flex-1 uical:cal:scrollbar-gutter-stable uical:cal:overflow-y-auto uical-scroll-y"
+      class="uical:cal:flex-1 uical:cal:scrollbar-gutter-stable uical:cal:overflow-y-auto uical-scroll-y uical:cal:max-lg:pb-24 uical:cal:max-lg:scroll-pb-24"
       :style="{ paddingTop: `${CHROME_HEIGHT}px`, scrollPaddingTop: `${CHROME_HEIGHT}px` }"
     >
       <CalendarMonthWeek
         v-for="week in staticWeeks"
         :key="week.getTime()"
         :week-start="week"
+        :focus-month="focusMonth"
         :style="{ height: `${ROW_HEIGHT}px` }"
       />
     </div>
@@ -261,7 +287,7 @@ watch(calendar.date, (date) => {
         v-for="(weekday, index) in weekdays"
         :key="weekday"
         class="uical:cal:flex uical:cal:items-center uical:cal:justify-end uical:cal:border-default uical:cal:pe-2 uical:cal:text-sm uical:cal:text-muted"
-        :class="index !== 0 && 'uical-border-start'"
+        :class="[index !== 0 && 'uical-border-start', index >= 5 && 'uical:cal:bg-muted/25']"
       >
         {{ weekday }}
       </span>

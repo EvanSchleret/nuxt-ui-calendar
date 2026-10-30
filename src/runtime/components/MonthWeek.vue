@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { addDays } from 'date-fns'
+import { addDays, isWeekend } from 'date-fns'
 import { useCalendar } from '#imports'
 import CalendarEventChip from './EventChip.vue'
 import type { AllDayPositionedEvent, CalendarEvent } from '../types'
@@ -11,7 +11,7 @@ const SLOT_HEIGHT = 22
 const MAX_SLOTS = 4
 const MAX_LANES = MAX_SLOTS - 1
 
-const props = defineProps<{ weekStart: Date }>()
+const props = defineProps<{ weekStart: Date, focusMonth: Date }>()
 const calendar = useCalendar()
 const days = computed(() => Array.from({ length: 7 }, (_, index) => addDays(props.weekStart, index)))
 const gridStyle = {
@@ -61,6 +61,15 @@ function label(day: Date): string {
   return String(day.getDate())
 }
 
+function inFocus(day: Date): boolean {
+  return day.getMonth() === props.focusMonth.getMonth() && day.getFullYear() === props.focusMonth.getFullYear()
+}
+
+function endsMonth(day: Date): boolean {
+  const nextWeek = addDays(day, 7)
+  return nextWeek.getMonth() !== day.getMonth() || nextWeek.getFullYear() !== day.getFullYear()
+}
+
 function openDay(day: Date) {
   calendar.setDate(day)
   calendar.setView('day')
@@ -72,13 +81,18 @@ function createAllDay(day: Date) {
 </script>
 
 <template>
-  <div class="uical:cal:grid uical:cal:min-w-0 uical:cal:grid-cols-7 uical-border-bottom uical:cal:border-default" :style="gridStyle">
+  <div class="uical:cal:grid uical:cal:min-w-0 uical:cal:grid-cols-7" :style="gridStyle">
     <div
       v-for="({ day }, index) in cells"
       :key="`day-${day.getTime()}`"
       :data-date="localDateTime(day).slice(0, 10)"
-      class="uical:cal:row-span-full uical:cal:border-default"
-      :class="index !== 0 && 'uical-border-start'"
+      class="uical:cal:row-span-full uical:cal:border-default uical-border-bottom"
+      :class="[
+        index !== 0 && 'uical-border-start',
+        index !== 0 && day.getDate() === 1 && 'uical:cal:border-s-accented',
+        endsMonth(day) && 'uical:cal:border-b-accented',
+        isWeekend(day) && 'uical:cal:bg-muted/25'
+      ]"
       :style="{ gridColumn: index + 1 }"
       @dblclick="createAllDay(day)"
     />
@@ -87,10 +101,10 @@ function createAllDay(day: Date) {
       v-for="({ day }, index) in cells"
       :key="`number-${day.getTime()}`"
       type="button"
-      class="uical:cal:row-start-1 uical:cal:m-0.5 uical:cal:inline-flex uical:cal:h-6 uical:cal:min-w-6 uical:cal:items-center uical:cal:justify-center uical:cal:justify-self-end uical:cal:rounded-full uical:cal:p-1 uical:cal:text-xs uical-font-semibold uical-transition-colors uical:cal:select-none uical-focus-outline"
+      class="uical:cal:row-start-1 uical:cal:m-0.5 uical:cal:inline-flex uical:cal:h-6 uical:cal:min-w-6 uical:cal:items-center uical:cal:justify-center uical:cal:justify-self-end uical:cal:rounded-full uical:cal:p-1 uical:cal:text-xs uical-font-semibold uical-transition-colors uical:cal:select-none uical-focus-outline uical:cal:pointer-coarse:h-8 uical:cal:pointer-coarse:min-w-8 uical:cal:pointer-coarse:text-sm"
       :class="day.toDateString() === new Date().toDateString()
         ? 'uical:cal:text-inverted uical:cal:bg-primary uical:cal:active:bg-primary/75 uical-outline-primary'
-        : 'uical:cal:text-default uical:cal:hover:bg-(--control-bg) uical:cal:active:bg-(--control-bg) uical-outline-inverted'"
+        : [inFocus(day) ? 'uical:cal:text-default' : 'uical:cal:text-dimmed', 'uical:cal:hover:bg-(--control-bg) uical:cal:active:bg-(--control-bg) uical-outline-inverted']"
       :style="{ gridColumn: index + 1 }"
       :aria-label="calendar.t('openDate', { date: day.toLocaleDateString(calendar.locale, { dateStyle: 'full' }) })"
       @click="openDay(day)"

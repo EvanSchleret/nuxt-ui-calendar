@@ -1,6 +1,6 @@
 # Nuxt UI Calendar
 
-A Nuxt module that provides the Calendar template's core UI and interactions as reusable components and composables. It includes day, week and month views, an optional standalone sidebar with a mini calendar, event editing and search overlays, drag and resize gestures, keyboard shortcuts, calendar visibility filters, optimistic updates, and an offline mutation queue.
+A Nuxt module that provides the Calendar template's core UI and interactions as reusable components and composables. It includes day, week, month and year views, touch swipe navigation, a floating mobile toolbar, an optional standalone sidebar with a mini calendar, event editing and search overlays, drag and resize gestures, keyboard shortcuts, calendar visibility filters, optimistic updates, and an offline mutation queue.
 
 The module provides client-side UI. The host application owns event loading and persistence through props and an optional adapter. `calendars` is optional; omit it to use the calendar without calendar filters or calendar assignments.
 
@@ -49,7 +49,9 @@ Calendar dates and labels inherit the locale configured on the host app's `<UApp
 
 ## Customize the toolbar
 
-`CalendarApp` exposes scoped slots for the view selector and range navigation. Each slot receives the current `date` and `view`, plus `setView`, `goToPrevious`, `goToToday` and `goToNext` actions. The `view-switcher` slot also receives the supported `views` (`day`, `week` and `month`). Leaving a slot unused keeps its default control. Set `view-switcher-placement="right"` to move the default selector or your custom `view-switcher` slot after the toolbar actions; the default placement is `center`.
+`CalendarApp` exposes scoped slots for the view selector and range navigation. Each slot receives the current `date` and `view`, plus `setView`, `goToPrevious`, `goToToday` and `goToNext` actions. The `view-switcher` slot also receives the supported `views` (`day`, `week`, `month` and `year`). Leaving a slot unused keeps its default control. Set `view-switcher-placement="right"` to move the default selector or your custom `view-switcher` slot after the toolbar actions; the default placement is `center`.
+
+The year view shows a compact calendar for each month. On larger screens, select a date to open its day view or a month name to open that month. On phones, each month tile opens its month view, and Today and event creation stay available in the floating toolbar. Horizontal swipes navigate day and week views; vertical scrolling remains available in the week grid.
 
 ```vue
 <CalendarApp v-model:events="events" view-switcher-placement="right">
@@ -227,12 +229,12 @@ The module auto-registers these components with the configured prefix:
 - `CalendarApp` renders the calendar and toolbar, and exposes its `CalendarController` as `calendar` on its component ref.
 - `CalendarSidebar` takes that controller as a `calendar` prop and provides the mini calendar and calendar visibility toggles.
 - `CalendarToolbar` provides view switching, range navigation, search and event creation.
-- `CalendarWeekView` and `CalendarMonthView` render the calendar grids.
+- `CalendarWeekView`, `CalendarMonthView` and `CalendarYearView` render the calendar grids.
 - `CalendarEventBlock` is the reusable event button used by both views.
 
 `useCalendar()` returns the current date, view, visible events, calendars, navigation actions, event mutations and overlay actions inside `CalendarApp`. `useCalendarEvents()` provides visible events and an `eventsForDay` selector.
 
-`shortcuts` enables `T` for today, `D`, `W` and `M` for views, `N` for a new event, `⌘K` / `Ctrl+K` for search and the arrow keys for previous and next ranges. It defaults to `false`, and the calendar does not display shortcut help. `infiniteScroll` controls month-view scrolling and defaults to `true`; set it to `false` to show the current six-week month grid without extending it while scrolling.
+`shortcuts` enables `T` for today, `D`, `W`, `M` and `Y` for views, `N` for a new event, `⌘K` / `Ctrl+K` for search and the arrow keys for previous and next ranges. It defaults to `false`, and the calendar does not display shortcut help. `infiniteScroll` controls month-view scrolling and defaults to `true`; set it to `false` to show the current six-week month grid without extending it while scrolling.
 
 ```vue
 <CalendarApp :infinite-scroll="false" />

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef } from 'vue'
-import { differenceInCalendarDays } from 'date-fns'
+import { differenceInCalendarDays, isWeekend } from 'date-fns'
 import { useCalendar } from '#imports'
 import CalendarDayColumn from './DayColumn.vue'
 import CalendarEventChip from './EventChip.vue'
@@ -20,6 +20,7 @@ const mounted = ref(false)
 const now = ref(new Date())
 const weekMedia = ref<MediaQueryList | null>(null)
 let clock: ReturnType<typeof setInterval> | undefined
+const swipeStart = ref<{ pointerId: number, x: number, y: number, startedOnEvent: boolean } | null>(null)
 
 const range = computed(() => daysForView(calendar.date.value, calendar.view.value))
 const days = computed(() => {
@@ -92,6 +93,43 @@ function isToday(day: Date): boolean {
   return day.toDateString() === now.value.toDateString()
 }
 
+function startSwipe(event: PointerEvent) {
+  if (event.pointerType !== 'touch' || !event.isPrimary) {
+    return
+  }
+
+  const target = event.target
+  swipeStart.value = {
+    pointerId: event.pointerId,
+    x: event.clientX,
+    y: event.clientY,
+    startedOnEvent: target instanceof Element && !!target.closest('[data-event], [data-resize-handle]')
+  }
+}
+
+function endSwipe(event: PointerEvent) {
+  const start = swipeStart.value
+  swipeStart.value = null
+
+  if (!start || start.pointerId !== event.pointerId || start.startedOnEvent) {
+    return
+  }
+
+  const distanceX = event.clientX - start.x
+  const distanceY = event.clientY - start.y
+  if (Math.abs(distanceX) < 50 || Math.abs(distanceX) < 2 * Math.abs(distanceY)) {
+    return
+  }
+
+  calendar.move(distanceX < 0 ? 1 : -1)
+}
+
+function cancelSwipe(event: PointerEvent) {
+  if (swipeStart.value?.pointerId === event.pointerId) {
+    swipeStart.value = null
+  }
+}
+
 function createAllDay(day: Date) {
   void calendar.openEvent(undefined, day, true)
 }
@@ -102,11 +140,14 @@ function createAllDay(day: Date) {
     <UScrollArea
       ref="container"
       :style="{ scrollPaddingTop: chromeOffset }"
-      class="uical:cal:z-0 uical:cal:flex-1 uical-scroll-y uical:cal:scrollbar-gutter-stable"
+      class="uical:cal:z-0 uical:cal:flex-1 uical-scroll-y uical:cal:scrollbar-gutter-stable uical:cal:max-lg:scroll-pb-24"
+      @pointerdown.passive="startSwipe"
+      @pointerup.passive="endSwipe"
+      @pointercancel="cancelSwipe"
     >
       <div
         data-week-grid
-        class="uical:cal:grid"
+        class="uical:cal:grid uical:cal:max-lg:pb-24"
         :style="{ ...gridStyle, paddingTop: chromeOffset, marginTop: mounted ? undefined : startPull }"
       >
         <div class="uical:cal:relative" :style="{ height: `${24 * HOUR_HEIGHT}px` }">
@@ -139,6 +180,7 @@ function createAllDay(day: Date) {
           v-for="day in days"
           :key="localDateTime(day).slice(0, 10)"
           class="uical:cal:flex uical:cal:items-center uical:cal:justify-center uical:cal:gap-1 uical-border-start uical:cal:border-default uical:cal:py-2 uical:cal:text-sm"
+          :class="isWeekend(day) && 'uical:cal:bg-muted/25'"
         >
           <span class="uical:cal:text-muted">{{ dayLabel(day) }}</span>
           <span
@@ -161,6 +203,7 @@ function createAllDay(day: Date) {
           :key="`all-day-${localDateTime(day).slice(0, 10)}`"
           :data-date="localDateTime(day).slice(0, 10)"
           class="uical:cal:row-span-full uical-border-start uical:cal:border-default"
+          :class="isWeekend(day) && 'uical:cal:bg-muted/25'"
           :style="{ gridColumn: index + 2 }"
           @dblclick="createAllDay(day)"
         />

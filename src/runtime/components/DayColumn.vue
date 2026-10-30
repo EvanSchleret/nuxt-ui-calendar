@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { differenceInMilliseconds } from 'date-fns'
+import { differenceInMilliseconds, isWeekend } from 'date-fns'
 import { useCalendar } from '#imports'
 import CalendarEventBlock from './EventBlock.vue'
 import type { PositionedCalendarEvent } from '../types'
@@ -41,6 +41,7 @@ function dropEvent(event: DragEvent) {
     data-day-column
     :data-date="localDateTime(day).slice(0, 10)"
     class="uical:cal:relative uical-snap-start uical-border-start uical:cal:border-default"
+    :class="isWeekend(day) && 'uical:cal:bg-muted/25'"
     :style="{ height: `${24 * HOUR_HEIGHT}px` }"
     @dblclick="createAt"
     @dragover.prevent

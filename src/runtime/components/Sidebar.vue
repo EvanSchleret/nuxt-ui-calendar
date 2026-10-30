@@ -145,7 +145,7 @@ onMounted(() => {
             :year-controls="false"
             size="xs"
             fixed-weeks
-            :ui="{ root: 'uical:cal:w-full' }"
+            :ui="{ root: 'uical:cal:w-full', cell: 'uical:cal:pointer-coarse:text-sm', cellTrigger: 'uical:cal:pointer-coarse:size-9', headCell: 'uical:cal:pointer-coarse:text-xs' }"
           />
         </slot>
       </slot>

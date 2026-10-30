@@ -59,7 +59,7 @@ const time = computed(() => new Intl.DateTimeFormat(calendar.locale, { hour: 'nu
     v-bind="$attrs"
     type="button"
     data-event
-    class="uical:cal:flex uical:cal:min-w-0 uical:cal:items-center uical:cal:gap-1.5 uical:cal:rounded-full uical:cal:px-1.5 uical:cal:py-0.5 uical:cal:text-start uical:cal:text-xs uical-transition-colors uical:cal:select-none uical-focus-outline"
+    class="uical:cal:flex uical:cal:min-w-0 uical:cal:items-center uical:cal:gap-1.5 uical:cal:rounded-full uical:cal:px-1.5 uical:cal:py-0.5 uical:cal:text-start uical:cal:text-xs uical-transition-colors uical:cal:select-none uical-focus-outline uical:cal:max-lg:rounded-sm uical:cal:max-lg:px-1"
     :class="[
       eventOutlineClasses[calendarColor],
       event.allDay
@@ -78,7 +78,7 @@ const time = computed(() => new Intl.DateTimeFormat(calendar.locale, { hour: 'nu
       <UIcon name="i-lucide-calendar" class="uical:cal:size-2.5 uical:cal:shrink-0 uical:cal:text-inverted" />
     </span>
     <span v-else class="uical:cal:size-2 uical:cal:shrink-0 uical:cal:rounded-full uical:cal:max-lg:hidden" :class="calendarDotClasses[calendarColor]" />
-    <span class="uical:cal:min-w-0 uical:cal:truncate uical-font-medium">{{ event.title }}</span>
+    <span class="uical:cal:min-w-0 uical:cal:truncate uical-font-medium uical:cal:max-lg:flex-1 uical:cal:max-lg:text-clip uical:cal:max-lg:[mask-image:linear-gradient(to_right,black_calc(100%-0.75rem),transparent)]">{{ event.title }}</span>
     <span v-if="showTime && !event.allDay" data-time class="uical:cal:ms-auto uical:cal:shrink-0 uical:cal:text-[11px] uical:cal:text-muted uical-tabular-nums">
       {{ time }}
     </span>
